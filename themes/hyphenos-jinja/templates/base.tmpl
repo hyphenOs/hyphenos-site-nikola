@@ -1,0 +1,134 @@
+{#  -*- coding: utf-8 -*- #}
+{% import 'base_helper.tmpl' as base with context %}
+{% import 'annotation_helper.tmpl' as notes with context %}
+{{ set_locale(lang) }}
+{{ base.html_headstart() }}
+{% block extra_head %}
+{#  Leave this block alone. #}
+{% endblock %}
+{{ template_hooks['extra_head']() }}
+
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">{{ messages("Skip to main content") }}</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+{% if theme_config.get('navbar_light') %}
+navbar-light bg-light
+{% else %}
+navbar-dark bg-dark
+{% endif %}
+">
+    <div class="container"><!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="{{ abs_link(_link("root", None, lang)) }}">
+        {% if logo_url %}
+            <img src="{{ logo_url }}" alt="{{ blog_title|e }}" id="logo" class="d-inline-block align-top">
+        {% endif %}
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav ml-auto">
+                {{ base.html_navigation_links_entries(navigation_links) }}
+                {{ template_hooks['menu']() }}
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container -->
+</nav>
+
+<!-- End of Menubar -->
+
+<div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        {{ template_hooks['page_header']() }}
+        {% block extra_header %}{% endblock %}
+        {% block content %}{% endblock %}
+        <!--End of body content-->
+
+        <div class="push" ></div>
+    </div>
+        <footer id="site-footer" class="site-footer" >
+            <div class="primary-footer" >
+                    <section class="primary-contact">
+                        <h4 class="headline" >Get In Touch</h4>
+                        <ul class="traditional-methods">
+                            <li>
+                                <a href="tel:917350688121" class="contact-method" >
+                                    <span class="label" >+91-7350688121</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="mailto:gabhijit@hyphenos.io" class="contact-method" >
+                                    <span class="label" >gabhijit@hyphenos.io</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <nav class="secondary-contact" >
+                        <h5 class="headline" >On The Web</h5>
+                        <a href="https://github.com/hyphenos" class="btn contact-method method-github"
+                                title="View our open source projects and experiments on Github">
+                           {#
+                           ::before
+                           #}
+                            <span class="label" >
+                           <i class="fa fa-github"></i>
+                           Github
+                            </span>
+                        </a>
+                        <a href="https://linkedin.com/company/hyphenos-software-labs" class="btn contact-method method-linkedin"
+                                title="View our Linkedin Company Profile" >
+                           {#
+                           ::before
+                           #}
+                            <span class="label" >
+                           <i class="fa fa-linkedin"></i>
+                           LinkedIn
+                            </span>
+                        </a>
+                    </nav>
+                    {#
+                        ::after
+                    #}
+            </div>
+
+            <div class="final-footer">
+                    <small class="copyright">
+                        {{ content_footer }}
+                        <span class="legal-name" >
+                            hyphenOs Software Labs Pvt. Ltd.
+                        </span>
+                    </small>
+            </div>
+
+            {{ template_hooks['page_footer']() }}
+            {% block extra_footer %}{% endblock %}
+        </footer>
+</div>
+
+{{ base.late_load_js() }}
+    {% if date_fanciness != 0 %}
+        <!-- fancy dates -->
+        <script>
+        moment.locale("{{ momentjs_locales[lang] }}");
+        fancydates({{ date_fanciness }}, {{ js_date_format }});
+        </script>
+        <!-- end fancy dates -->
+    {% endif %}
+    {% block extra_js %}{% endblock %}
+    <script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element) {
+            return element.getElementsByTagName('img')[0].alt;
+    }});
+    </script>
+{{ body_end }}
+{{ template_hooks['body_end']() }}
+</body>
+</html>
