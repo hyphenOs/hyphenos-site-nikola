@@ -7,4 +7,5 @@
 .. description:
 .. type: text
 
-Write your page here.
+
+hyphenOs Home Page

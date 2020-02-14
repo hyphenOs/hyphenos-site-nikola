@@ -1,0 +1,35 @@
+<!-- Menubar -->
+<header class="main-header mb-5">
+<nav class="navbar navbar-expand-md static-top mb-4
+{% if theme_config.get('navbar_light') %}
+navbar-light bg-light
+{% else %}
+navbar-dark bg-dark
+{% endif %}
+">
+    <div class="container"><!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="{{ abs_link(_link("root", None, lang)) }}">
+        {% if logo_url %}
+            <img src="{{ logo_url }}" alt="{{ blog_title|e }}" id="logo" class="d-inline-block align-top">
+        {% endif %}
+
+        {% if show_blog_title %}
+            <span id="blog-title">{{ blog_title|e }}</span>
+        {% endif %}
+
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav ml-auto">
+                {{ base.html_navigation_links_entries(navigation_links) }}
+                {{ template_hooks['menu']() }}
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container -->
+</nav>
+</header>
+
+<!-- End of Menubar -->

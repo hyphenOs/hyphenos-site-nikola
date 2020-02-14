@@ -224,6 +224,10 @@ POSTS = (
     ("posts/*.html", "blog", "post.tmpl"),
 )
 PAGES = (
+    ("pages/index.rst", "", "home.tmpl"),
+    ("pages/blog.rst", "", "blog.tmpl"),
+    ("pages/contact.rst", "", "contact.tmpl"),
+    ("pages/services.rst", "", "services.tmpl"),
     ("pages/*.rst", "", "page.tmpl"),
     ("pages/*.md", "", "page.tmpl"),
     ("pages/*.txt", "", "page.tmpl"),
@@ -1345,7 +1349,11 @@ WARN_ABOUT_TAG_METADATA = False
 
 # Put in global_context things you want available on all your templates.
 # It can be anything, data, functions, modules, etc.
-GLOBAL_CONTEXT = {}
+GLOBAL_CONTEXT = {
+        'GITHUB_URL': "https://github.com/hyphenos",
+        'LINKEDIN_URL': "https://linkedin.com/company/hyphenos-software-labs",
+        'BANNER_URL': "/assets/img/banner.jpg"
+}
 
 # Add functions here and they will be called with template
 # GLOBAL_CONTEXT as parameter when the template is about to be
