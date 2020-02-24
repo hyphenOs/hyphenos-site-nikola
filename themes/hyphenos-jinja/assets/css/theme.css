@@ -1,6 +1,5 @@
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
 }
 
 .page-header-1 {
@@ -15,7 +14,7 @@ html {
     position: relative;
     display: table;
     width: 100%;
-    height: 80vh;
+    height: 500px;
     text-align: center;
     background: #222 no-repeat center center;
     background-size: cover;
@@ -28,10 +27,8 @@ html {
 }
 
 .hero-banner-sm .headline {
-    font-weight: 600;
     font-size: 2em;
-    line-height: 1.3em;
-    text-transform: uppercase;
+    line-height: 1.4em;
 }
 
 .hero-banner-sm .headline::after {
@@ -44,20 +41,16 @@ html {
 }
 
 .hero-banner-sm .sub-headline {
-    max-width: 20em;
+    max-width: 18em;
     margin: auto;
-    font-size: 1.5em;
+    font-size: 1.2em;
 }
 
 /* ==========================================================================
     Media Query for .hero-banner-md (width: 768)
    ========================================================================== */
 
-   @media only screen and (max-width: 768px) and (min-width: 577px) {
-       .hero-banner-sm {
-           height: 60vh;
-       }
-   }
+   @media only screen and (max-width: 768px) and (min-width: 577px) {}
 
 /* ==========================================================================
     Media Query for .hero-banner-sm (width: 576)
@@ -65,7 +58,7 @@ html {
 
    @media only screen and (max-width: 576px) {
        .hero-banner-sm {
-           height: 30vh;
+           height: 320px;
        }
 
        .hero-banner-sm .headline {
@@ -79,6 +72,12 @@ html {
        .hero-banner-sm .scroll-down {
            display: none;
        }
+
+       .primary-footer {
+           display: flex;
+           flex-direction: column;
+       }
+
    }
 
 /* Create a bouncing scroll-down arrow on homepage with cover image */
@@ -175,7 +174,8 @@ html {
     content: "\f431";
 }
 
-.navbar-nav .active {
+.active > .nav-link   {
+    display: inline-block;
     border-bottom: 2px solid #000080;
 }
 
@@ -193,8 +193,6 @@ a:hover{
 .site-footer {
     background: aliceblue;
     text-align: center;
-    margin: 0 -9999rem;
-    padding: 0.25rem 9999rem;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -224,7 +222,7 @@ a:hover{
 }
 
 .copyright {
-    font-size: 1em;
+    font-size: 0.6em;
 }
 
 img {
