@@ -10,10 +10,11 @@
 
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">{{ messages("Skip to main content") }}</a>
 
-{% block hero %}{% endblock %}
-{% include "base_header.tmpl" %}
+<div id="body-header">
+    {% block hero %}{% endblock %}
+    {% include "base_header.tmpl" %}
+</div>
 
 <div class="container" id="content" role="main">
     <div class="body-content">
@@ -29,7 +30,10 @@
         <!--End of body content-->
     </div>
 </div>
-{% include "base_footer.tmpl" %}
+
+<div id="body-footer">
+    {% include "base_footer.tmpl" %}
+</div>
 
 {{ base.late_load_js() }}
     {% if date_fanciness != 0 %}
@@ -41,13 +45,14 @@
         <!-- end fancy dates -->
     {% endif %}
     {% block extra_js %}{% endblock %}
-    <script>
+    <!--script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element) {
             return element.getElementsByTagName('img')[0].alt;
     }});
-    </script>
+    </script-->
+
 {{ body_end }}
 {{ template_hooks['body_end']() }}
 </body>
