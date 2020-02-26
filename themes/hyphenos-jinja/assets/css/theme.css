@@ -23,6 +23,44 @@ body {
     flex-shrink: 0;
 }
 
+.services-card {
+    box-shadow: 0px 0px 10px 10px aliceblue;
+    border-radius: 1em;
+    max-width: 800px;
+    padding: 1em 4em;
+    margin: auto;
+}
+
+.services-card h2::before {
+    content: " ";
+    background: url("../img/code.svg");
+    height: 5rem;
+    width: 5rem;
+    margin: .5em auto;
+    display:block;
+}
+
+.services-card h2 {
+    color: #292961;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.services-card h2::after {
+    content: " ";
+    border-bottom: 2px solid rgba(41,97,41, 0.2);
+    width: 100px;
+    margin: 1em auto;
+    display: block;
+}
+
+.services-card p {
+    text-align: justify;
+    font-size: 1.2em;
+    line-height: 1.6em;
+    color: #296129;
+}
+
 /* FIXME  might be unused */
 .page-header-1 {
     text-transform: uppercase;
@@ -114,6 +152,12 @@ body {
        .navbar-brand {
            max-width: 128px;
        }
+
+       .services-card {
+           box-shadow: 0 0 5px 5px aliceblue;
+	       padding: .5em 1em;
+       }
+
    }
 
 /* Create a bouncing scroll-down arrow on homepage with cover image */

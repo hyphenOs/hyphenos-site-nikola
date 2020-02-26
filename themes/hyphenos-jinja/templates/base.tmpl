@@ -25,7 +25,7 @@
         <a href={{post.permalink()}}>
             <h1 class="page-header-1" >{{title}}</h1>
         </a>
-        <p>{{post.text()}}</p>
+        {% block cards %}{% endblock %}
         {% endblock %}
         <!--End of body content-->
     </div>
