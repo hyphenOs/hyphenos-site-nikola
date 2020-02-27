@@ -8,4 +8,4 @@
 .. type: text
 
 
-hyphenOs Home Page
+Our team has worked in all levels of abstractions of software systems and our philosophy is to use the right tools for the problem at hand and a solid focus on engineering practices.
