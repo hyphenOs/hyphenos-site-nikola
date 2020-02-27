@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
 }
 
-#body-header, #content, #baguetteBox-overlay {
+#content {
     flex: 1 0 auto;
 }
 
@@ -61,13 +61,12 @@ body {
     color: #296129;
 }
 
-/* FIXME  might be unused */
 .page-header-1 {
     text-transform: uppercase;
-    font-size: 2.5rem;
-    margin-top: 1em;
-    margin-bottom: 1em;
     text-align: center;
+    font-size: 2rem;
+    padding: 1em;
+    color: #296129;
 }
 
 .navbar-brand {
@@ -98,8 +97,8 @@ body {
 }
 
 .hero-banner-sm .headline {
-    font-size: 2em;
-    line-height: 1.4em;
+    font-size: 2rem;
+    line-height: .9em;
 }
 
 .hero-banner-sm .headline::after {
