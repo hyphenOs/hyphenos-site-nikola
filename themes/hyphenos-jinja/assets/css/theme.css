@@ -23,12 +23,22 @@ body {
     flex-shrink: 0;
 }
 
+.services-headline {
+    margin: auto;
+    color: #296129;
+    font-size: 1.2rem;
+    padding: 1.2rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+}
 .services-card {
     box-shadow: 0px 0px 10px 10px aliceblue;
     border-radius: 1em;
     max-width: 800px;
     padding: 1em 4em;
     margin: auto;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
 }
 
 .services-card h2::before {
