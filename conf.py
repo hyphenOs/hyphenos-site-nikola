@@ -139,7 +139,7 @@ TRANSLATIONS_PATTERN = '{path}.{lang}.{ext}'
 
 NAVIGATION_LINKS = {
     DEFAULT_LANG: (
-        ("/blog/", "Blog"),
+        # ("/blog/", "Blog"),
         ("/services/", "Services"),
         ("/contact/", "Contact"),
     ),
@@ -226,7 +226,7 @@ POSTS = (
 PAGES = (
     ("pages/index.html", "", "home.tmpl"),
     #("pages/blog.rst", "", "blog.tmpl"),
-    ("pages/contact.rst", "", "contact.tmpl"),
+    ("pages/contact.html", "", "contact.tmpl"),
     ("pages/services.html", "", "services.tmpl"),
     #("pages/*.rst", "", "page.tmpl"),
     #("pages/*.md", "", "page.tmpl"),

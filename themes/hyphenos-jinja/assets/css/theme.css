@@ -15,6 +15,10 @@ body {
     min-height: 100vh;
 }
 
+.header-color {
+    background: aliceblue;
+}
+
 #content {
     flex: 1 0 auto;
 }
@@ -23,7 +27,8 @@ body {
     flex-shrink: 0;
 }
 
-.services-headline {
+.services-headline,
+.content-headline {
     margin: auto;
     color: #296129;
     font-size: 1.2rem;
@@ -31,8 +36,43 @@ body {
     margin-bottom: 2rem;
     max-width: 800px;
 }
-.services-card {
-    box-shadow: 0px 0px 10px 10px aliceblue;
+.contact-container {
+    display: flex;
+    justify-content: center;
+}
+
+.contact-form {
+    margin: 0 2em;
+    padding-top: 1em;
+}
+
+.contact-form form  {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-form input {
+    border-radius: .25em;
+    margin-bottom: .5em;
+}
+
+.contact-form textarea {
+    border-radius: .25em;
+    margin-bottom: .5em;
+}
+
+.contact-info {
+    padding-top: 1em;
+    margin: 0 2em;
+}
+
+.contact-info > h5 {
+    color: #292961;
+}
+
+.services-card,
+.content-card {
+    box-shadow: 0px 0px 5px 5px aliceblue;
     border-radius: 1em;
     max-width: 800px;
     padding: 1em 4em;
@@ -64,7 +104,7 @@ body {
     display: block;
 }
 
-.services-card p {
+.services-card p, .content-card p {
     text-align: justify;
     font-size: 1.2em;
     line-height: 1.6em;
@@ -116,8 +156,8 @@ body {
     content: "";
     border-bottom: 2px solid;
     max-width: 5em;
-    width: 10%;
-    margin: .5em auto ;
+    width: 5%;
+    margin: .75em auto;
 }
 
 .hero-banner-sm .sub-headline {
@@ -164,8 +204,22 @@ body {
 
        .services-card {
            box-shadow: 0 0 5px 5px aliceblue;
-	       padding: .5em 1em;
+           padding: .5em 1em;
        }
+
+       .services-card > p {
+           font-size: 1em;
+           line-height: 1.4em;
+        }
+
+        .contact-container {
+            flex-direction: column;
+        }
+
+        .contact-info {
+            padding-top: 2rem;
+            text-align: center;
+        }
 
    }
 
@@ -291,7 +345,15 @@ a:hover{
 
 .primary-footer {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+}
+
+.primary-contact {
+    margin: 0 2em;
+}
+
+.contact-card {
+    margin: 0 2em;
 }
 
 .site-footer .headline {
@@ -299,6 +361,7 @@ a:hover{
     font-size: 1.1em;
     line-height: 1.28205em;
     font-weight: 700;
+    color: #292961;
 }
 
 .traditional-methods {
@@ -306,11 +369,11 @@ a:hover{
     padding-left: 0;
 }
 
-.contact-method {
+.site-footer .contact-method {
     font-size: 1em;
     line-height: 1.73077em;
     font-weight: 700;
-    color: #183280;
+    color: #296129;
 }
 
 .copyright {
@@ -323,6 +386,10 @@ img {
 
 .titlebox {
     text-align: right;
+}
+
+.btn {
+    padding: .1em;
 }
 
 
