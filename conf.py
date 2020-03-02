@@ -224,12 +224,12 @@ POSTS = (
     ("posts/*.html", "blog", "post.tmpl"),
 )
 PAGES = (
-    ("pages/index.rst", "", "home.tmpl"),
-    ("pages/blog.rst", "", "blog.tmpl"),
+    ("pages/index.html", "", "home.tmpl"),
+    #("pages/blog.rst", "", "blog.tmpl"),
     ("pages/contact.rst", "", "contact.tmpl"),
-    ("pages/services.rst", "", "services.tmpl"),
-    ("pages/*.rst", "", "page.tmpl"),
-    ("pages/*.md", "", "page.tmpl"),
+    ("pages/services.html", "", "services.tmpl"),
+    #("pages/*.rst", "", "page.tmpl"),
+    #("pages/*.md", "", "page.tmpl"),
     ("pages/*.txt", "", "page.tmpl"),
     ("pages/*.html", "", "page.tmpl"),
 )

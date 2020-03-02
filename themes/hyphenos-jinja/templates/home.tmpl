@@ -3,3 +3,7 @@
 {% block hero %}
 {% include "hero_banner.tmpl" %}
 {% endblock %}
+
+{% block content %}
+{{ post.text() }}
+{% endblock %}
