@@ -214,10 +214,10 @@ body {
 
         .contact-container {
             flex-direction: column;
+	    padding: 1em 0.5em;
         }
 
-        .contact-info {
-            padding-top: 2rem;
+        .contact-info, .contact-info > p {
             text-align: center;
         }
 
