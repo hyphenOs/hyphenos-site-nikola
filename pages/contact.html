@@ -4,12 +4,15 @@
 .. type: text
 
 <h3 class="content-headline">
-    Would you like to know more about <strong class="blue">hyphenOs</strong>, say <a class="green" style="text-decoration: underline;" href="mailto:hello@hyphenos.io"><em>hello</em></a> and let's begin a conversation.
+    Would you like to know more about <strong class="blue">hyphenOs</strong>, say <a class="green"
+        style="text-decoration: underline;" href="mailto:hello@hyphenos.io"><em>hello</em></a> and let's begin a
+    conversation.
 </h3>
 
 <div class="contact-container content-card">
     <div class="contact-form blue">
-        <form action="https://formspree.io/hello@hyphenos.io" method="POST">
+        <form action="https://formspree.io/hello@hyphenos.io" onsubmit="return invokeRecaptcha()"
+            id="contact-form-submit" method="POST">
             <label for="name">Name</label>
             <input name="name" required>
             <label for="email">Email</label>
@@ -17,9 +20,11 @@
             <label for="message">Message</label>
             <textarea name="message" required></textarea>
             <input type="submit" value="Send">
+            <div class="g-recaptcha" data-callback="onRecaptchaSuccess"
+                data-sitekey="6LdF3N8UAAAAAL7CRWvfFngAHVv735WD3NbNAgtZ" data-size="invisible">
+            </div>
         </form>
     </div>
-
     <div class="contact-info green">
         <h5>Phone</h5>
         <p>+91-7350688121</p>
@@ -35,3 +40,9 @@
             Maharashtra, India</p>
     </div>
 </div>
+<script>
+    function invokeRecaptcha() {
+        grecaptcha.execute();
+        return false
+    }
+</script>

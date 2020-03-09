@@ -29,11 +29,10 @@ body {
 
 .services-headline,
 .content-headline {
-    margin: auto;
+    margin: auto auto 2rem auto;
     color: #296129;
     font-size: 1.2rem;
     padding: 1.2rem;
-    margin-bottom: 2rem;
     max-width: 800px;
 }
 .contact-container {
@@ -51,11 +50,7 @@ body {
     flex-direction: column;
 }
 
-.contact-form input {
-    border-radius: .25em;
-    margin-bottom: .5em;
-}
-
+.contact-form input,
 .contact-form textarea {
     border-radius: .25em;
     margin-bottom: .5em;
@@ -76,9 +71,7 @@ body {
     border-radius: 1em;
     max-width: 800px;
     padding: 1em 4em;
-    margin: auto;
-    margin-top: 3rem;
-    margin-bottom: 3rem;
+    margin: 3rem auto;
 }
 
 .services-card h2::before {
@@ -214,7 +207,7 @@ body {
 
         .contact-container {
             flex-direction: column;
-	    padding: 1em 0.5em;
+            padding: 1em 0.5em;
         }
 
         .contact-info, .contact-info > p {
