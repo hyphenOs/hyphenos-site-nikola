@@ -195,12 +195,12 @@ body {
            max-width: 128px;
        }
 
-       .services-card {
+       .services-card, .content-card {
            box-shadow: 0 0 5px 5px aliceblue;
            padding: .5em 1em;
        }
 
-       .services-card > p {
+       .services-card > p, .content-card > p {
            font-size: 1em;
            line-height: 1.4em;
         }
