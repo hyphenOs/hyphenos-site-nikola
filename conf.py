@@ -1352,7 +1352,7 @@ WARN_ABOUT_TAG_METADATA = False
 GLOBAL_CONTEXT = {
         'GITHUB_URL': "https://github.com/hyphenos",
         'LINKEDIN_URL': "https://linkedin.com/company/hyphenos-software-labs",
-        'BANNER_URL': "/assets/img/goran-ivos-ly-1982x1982-unsplash.png"
+        'BANNER_URL': "/assets/img/goran-ivos-ly-1982x1982-unsplash.jpg"
 }
 
 # Add functions here and they will be called with template
