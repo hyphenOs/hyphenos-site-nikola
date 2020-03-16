@@ -1,0 +1,35 @@
+{#  -*- coding: utf-8 -*- #}
+{% import 'index_helper.tmpl' as helper with context %}
+{% import 'math_helper.tmpl' as math with context %}
+{% import 'comments_helper.tmpl' as comments with context %}
+{% import 'pagination_helper.tmpl' as pagination with context %}
+{% extends 'base.tmpl' %}
+
+{% block content %}
+<div class="blog-list">
+    {% for post in posts %}
+    <div class="blog-card">
+        <header class="blog-header">
+            <h1><a class="blue" href="{{ post.permalink() }}">{{ post.title() }}</a></h1>
+            <div class="blog-subheader">
+                <time class="blue" datetime="{{ post.formatted_date('webiso') }}">
+                    {{ post.formatted_date(date_format) }}
+                </time>
+                <a class="green" href="{{ _link('author', post.author()) }}">{{ post.author() }}</a>
+            </div>
+        </header>
+        {% if post.meta('summary') %}
+        <article class="blog-content">
+            {{ post.meta('summary') }}
+            <br>
+            <br>
+            <a id="blog-read-more" href="{{post.permalink() }}">Read more...</a>
+        </article>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{{ helper.html_pager() }}
+{{ comments.comment_link_script() }}
+{{ math.math_scripts_ifposts(posts) }}
+{% endblock %}
