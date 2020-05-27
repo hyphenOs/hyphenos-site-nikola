@@ -1,8 +1,8 @@
 .. title: CRUD Pattern in React Intro
 .. slug: crud-pattern-in-react-intro
 .. date: 2020-03-12 17:02:28 UTC+05:30
-.. tags:
-.. category:
+.. tags: CRUD, Design Pattern
+.. category: React
 .. link:
 .. description:
 .. status: draft
