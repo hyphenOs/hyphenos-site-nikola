@@ -23,7 +23,7 @@ We can implement above functionality in `React.js` as -
 
 Here's an overview of CRUD pattern -
 
-> Base component structure
+## Base component structure
 
 ```javascript
 class Base extends React.Component {
@@ -64,7 +64,7 @@ We'll check the `Books` component into more details to demonstrate the pattern -
 2.  `BookForm` - UI component that creates a new book object or updates an existing book object. An existing book object is passed by parent component. It does the form validation, field value change, error and API error handling by itself.
 3.  Books - Base component that wraps `BookForm` and `BookTable` component. passes CRUD actions and book objects to child component
 
-> Books component structure
+## Books component structure
 
 ```javascript
 class Books extends React.Component {
@@ -113,4 +113,3 @@ As can be seen above, the `Books` component, is actually a concrete implementati
 We will be looking at implementation details of the Form component in a subsequent post, which covers an interesting way of handling 'Form Validation' and 'API Response' validation etc and how this can be all wrapped inside the Form component without the functionality leaking out.
 
 If you have queries about this post, please create an issue in one of the mentioned repos. Comments are disabled for the post as of now.
-

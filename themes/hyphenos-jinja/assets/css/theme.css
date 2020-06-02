@@ -5,6 +5,10 @@
     color: #292961
 }
 
+code {
+    color: #296129;
+}
+
 html {
     scroll-behavior: smooth;
 }
