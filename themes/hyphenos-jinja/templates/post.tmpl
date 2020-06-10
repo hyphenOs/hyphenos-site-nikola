@@ -5,15 +5,23 @@
     <header class="blog-header">
         <h1>{{ post.title() }}</h1>
         <div class="blog-subheader">
-            <time datetime="{{ post.formatted_date("webiso") }}">{{ post.formatted_date(date_format) }}</time>
-            <a class="green" href="{{ _link('author', post.author()) }}">{{ post.author() }}</a>
+            <div>
+                <time datetime="{{ post.formatted_date('webiso') }}">
+                    {{ post.formatted_date(date_format) }}
+                </time>
+                <a class="green" href="{{ _link('author', post.author()) }}">
+                    {{ post.author() }}
+                </a>
+            </div>
+            <div>
+                {% for tag in post.tags %}
+                   <a class="blog-tag" href="{{ _link('tag', tag) }}">{{ tag }}</a>
+                {% endfor %}
+            </div>
         </div>
     </header>
     <article class="blog-content">
         {{ post.text() }}
     </article>
 </div>
-{% for tag in post.tags %}
-<a class="blog-tag" href="{{ _link('tag', tag) }}">{{ tag }}</a>
-{% endfor %}
 {% endblock %}

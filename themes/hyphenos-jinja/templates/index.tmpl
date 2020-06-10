@@ -12,10 +12,19 @@
         <header class="blog-header">
             <h1><a class="blue" href="{{ post.permalink() }}">{{ post.title() }}</a></h1>
             <div class="blog-subheader">
-                <time class="blue" datetime="{{ post.formatted_date('webiso') }}">
-                    {{ post.formatted_date(date_format) }}
-                </time>
-                <a class="green" href="{{ _link('author', post.author()) }}">{{ post.author() }}</a>
+                <div>
+                    <time class="blue" datetime="{{ post.formatted_date('webiso') }}">
+                        {{ post.formatted_date(date_format) }}
+                    </time>
+                    <a class="green" href="{{ _link('author', post.author()) }}">
+                        {{ post.author() }}
+                    </a>
+                </div>
+                <div>
+                    {% for tag in post.alltags %}
+                        <a class="blog-tag blue" href="{{ _link('tag', tag) }}">{{ tag }}</a>
+                    {% endfor %}
+                </div>
             </div>
         </header>
         {% if post.meta('summary') %}
