@@ -6,16 +6,34 @@
 {% extends 'base.tmpl' %}
 
 {% block content %}
+<div class="blog-container">
+  <div class="blog-links blog-header blog-card">
+    <h5 class="blog-link">
+      <a class="blue" href="/archive.html">Archive</a>
+    </h5>
+    <h5 class="blog-link">
+      <a class="blue" href="/categories">Categories</a>
+    </h5>
+  </div>
 <div class="blog-list">
     {% for post in posts %}
     <div class="blog-card">
         <header class="blog-header">
-            <h1><a class="blue" href="{{ post.permalink() }}">{{ post.title() }}</a></h1>
+            <h2><a class="blue" href="{{ post.permalink() }}">{{ post.title() }}</a></h2>
             <div class="blog-subheader">
-                <time class="blue" datetime="{{ post.formatted_date('webiso') }}">
-                    {{ post.formatted_date(date_format) }}
-                </time>
-                <a class="green" href="{{ _link('author', post.author()) }}">{{ post.author() }}</a>
+                <div>
+                    <time class="blue" datetime="{{ post.formatted_date('webiso') }}">
+                        {{ post.formatted_date(date_format) }}
+                    </time>
+                    <a class="green" href="{{ _link('author', post.author()) }}">
+                        {{ post.author() }}
+                    </a>
+                </div>
+                <div>
+                    {% for tag in post.alltags %}
+                        <a class="blog-tag blue" href="{{ _link('tag', tag) }}">{{ tag }}</a>
+                    {% endfor %}
+                </div>
             </div>
         </header>
         {% if post.meta('summary') %}
@@ -28,6 +46,15 @@
         {% endif %}
     </div>
     {% endfor %}
+</div>
+  <div class="blog-links blog-header blog-card">
+    <h5 class="blog-link">
+      <a class="blue" href="/archive.html">Archive</a>
+    </h5>
+    <h5 class="blog-link">
+      <a class="blue" href="/categories">Categories</a>
+    </h5>
+  </div>
 </div>
 {{ helper.html_pager() }}
 {{ comments.comment_link_script() }}

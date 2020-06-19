@@ -1,0 +1,17 @@
+{#  -*- coding: utf-8 -*- #}
+{% extends 'base.tmpl' %}
+
+{% block content %}
+<h4 class="blog-header blog-card">{{ messages("Categories") }}</h4>
+{% if items %}
+    <div class="list-inline">
+        {% for text, link in items %}
+            {% if text not in hidden_tags %}
+                <div class="list-inline-item">
+                    <a class="blog-header blog-card" href="{{ link }}">{{ text|e }}</a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
