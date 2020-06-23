@@ -25,15 +25,24 @@ body {
 
 .blog-card {
     box-shadow: 0 0 5px 5px aliceblue;
-    border-radius: 1em;
+    border-radius: .5em .5em .2em .2em;
     margin-bottom: 2em;
 }
+
 .blog-header {
     text-align: center;
-    padding: 1em 1em;
-    background: aliceblue;
+    padding: 1em;
     color: #292961;
 }
+
+.feedlink {
+    margin: 1em;
+}
+
+.feedlink > a {
+    color: #292961;
+}
+
 
 .blog-subheader time::after {
     content: " by "
@@ -41,7 +50,7 @@ body {
 
 .blog-content {
     padding: 1em 2em;
-    font-size: 1.4em;
+    font-size: 1.2em;
     text-align: justify;
 }
 
@@ -58,6 +67,43 @@ body {
     color: #292961;
     padding: .2em .5em;
     border-radius: .5em;
+}
+
+.blog-links {
+    display: flex;
+}
+
+.blog-link {
+    margin: auto 2rem;
+}
+
+.blog-chip-container {
+    padding: 1em;
+}
+
+.blog-chip {
+    padding: 0.5em 1em;
+    margin: 0 1em;
+    border-radius: .25em;
+    border: 1px solid lightgrey
+}
+
+.blog-header > h2 > a:hover,
+.list-inline-item > a:hover,
+.blog-link a:hover,
+.postlist a:hover,
+.feedlink > a:hover,
+code {
+    color: #296129;
+}
+
+.list-inline {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.list-inline-item {
+    margin: 1em .5em;
 }
 
 .services-headline,
@@ -252,8 +298,8 @@ body {
             padding: .5em .5em;
         }
 
-        .blog-header > h1 {
-            font-size: 2em;
+        .blog-header > h2 {
+            font-size: 1.75em;
         }
 
         .blog-content {
@@ -261,6 +307,20 @@ body {
             font-size: 1em;
         }
 
+        .blog-chip-container {
+            display: flex;
+            flex-direction: column;
+            padding: .5em;
+        }
+
+        .blog-chip {
+            padding: .2em;
+            margin: 0;
+        }
+
+        .listdate {
+            font-size: .7rem;
+        }
    }
 
 /* Create a bouncing scroll-down arrow on homepage with cover image */

@@ -1,0 +1,33 @@
+{#  -*- coding: utf-8 -*- #}
+{% extends 'list_post.tmpl' %}
+{% import 'feeds_translations_helper.tmpl' as feeds_translations with context %}
+
+{% block extra_head %}
+    {{ feeds_translations.head(author, kind, rss_override=False) }}
+{% endblock %}
+
+{% block content %}
+<article class="authorpage">
+    <header>
+        <h4 class="blog-header blog-card">{{ title|e }}</h4>
+        {% if description %}
+            <p>{{ description }}</p>
+        {% endif %}
+    </header>
+    {% if posts %}
+        <div class="postlist">
+            {% for post in posts %}
+                <div class="blog-chip-container" >
+                    <time class="listdate" datetime="{{ post.formatted_date('webiso') }}" title="{{ post.formatted_date(date_format)|e }}">
+                        {{ post.formatted_date(date_format)|e }}
+                    </time>
+                    <a href="{{ post.permalink() }}" class="listtitle blog-chip blue">{{ post.title()|e }}</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+        <div class="metadata">
+            {{ feeds_translations.feed_link(author, kind) }}
+        </div>
+</article>
+{% endblock %}
