@@ -97,6 +97,10 @@ code {
     color: #296129;
 }
 
+.utterances {
+    max-width: 100%;
+}
+
 .list-inline {
     display: flex;
     flex-flow: row wrap;
