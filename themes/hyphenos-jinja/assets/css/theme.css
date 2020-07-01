@@ -23,6 +23,10 @@ body {
     flex: 1 0 auto;
 }
 
+.error-page-header {
+    color: #292961;
+}
+
 .blog-card {
     box-shadow: 0 0 5px 5px aliceblue;
     border-radius: .5em .5em .2em .2em;
