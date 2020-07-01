@@ -663,6 +663,10 @@ pre {
     padding: 0.75rem;
 }
 
+pre.code {
+    background: aliceblue;
+}
+
 ul.navbar-nav {
     margin-top: 0;
 }
@@ -695,6 +699,7 @@ ul.pager li a {
     line-height: 1.25;
     border: 1px solid #ddd;
     border-radius: .25rem;
+    background-color: aliceblue;
 }
 
 .codetable td {
@@ -714,4 +719,23 @@ ul.pager li a {
     margin-right: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+/* We need to add following style because, bootstrap clears all styling for table */
+th, td {
+    border: 1px solid gray;
+    padding: 0.5em;
+}
+
+th {
+    background: aliceblue;
+    color: #292961;
+}
+
+a {
+    color: #292961;
+}
+
+a:hover {
+    color: #296129;
 }

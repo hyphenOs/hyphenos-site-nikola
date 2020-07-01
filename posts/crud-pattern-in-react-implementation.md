@@ -1,7 +1,7 @@
 .. title: CRUD Pattern in React - Implementation
 .. slug: crud-pattern-in-react-implementation
 .. date: 2020-05-07 12:57:04 UTC+05:30
-.. tags: React.js
+.. tags: ReactJS
 .. link:
 .. description:
 .. type: text
