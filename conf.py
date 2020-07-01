@@ -225,11 +225,9 @@ POSTS = (
 )
 PAGES = (
     ("pages/index.html", "", "home.tmpl"),
-    #("pages/blog.rst", "", "blog.tmpl"),
     ("pages/contact.html", "", "contact.tmpl"),
     ("pages/services.html", "", "services.tmpl"),
-    #("pages/*.rst", "", "page.tmpl"),
-    #("pages/*.md", "", "page.tmpl"),
+    ("pages/404.html", "", "404.tmpl"),
     ("pages/*.txt", "", "page.tmpl"),
     ("pages/*.html", "", "page.tmpl"),
 )
