@@ -1,0 +1,575 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="date" content="2019-06-17">
+
+    <title>Python for Simulating Poker Games</title>
+
+    <link rel="stylesheet" href="/slides/css/reset.css">
+    <link rel="stylesheet" href="/slides/css/reveal.css">
+    <link rel="stylesheet" href="/slides/css/theme/hyphenos.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="/slides/lib/css/monokai.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '/slides/css/print/pdf.css' : '/slides/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+
+<section>
+	<h3> Call, Raise or Fold<h3>
+			<h4> Running Poker Simulations in Python</h4>
+      <p> by Abhijit Gadgil</p>
+
+</section>
+ <section data-markdown data-separator="^---" data-separator-vertical="^--">
+                       <script type="text/template">
+### About Me
+
+1. Work as independent consultant.
+2. Mostly programming in Python for fun as well as for work.
+3. Run a consultancy firm, hyphenOs Software Labs.
+4. Like Python for quickly trying out ideas
+
+---
+
+### Overview Of the talk
+ 1. Why this Problem?
+ 1. An introduction to Game of Poker <!-- .element: class="fragment" -->
+ 2. Types of Poker Hands and Ranking them <!-- .element: class="fragment" -->
+ 3. Simulating a Poker Game <!-- .element: class="fragment" -->
+ 4. Statistics of a large number of games. <!-- .element: class="fragment" -->
+---
+### Why This Problem?
+
+
+This is a good candidate for demonstrating how to 'Think In Python'.
+
+--
+Thinking in a language is about built-ins, core constructs and standard library.
+--
+Ranking Poker hands becomes quite a challenging problem, without `set` like abstraction.
+
+---
+### Game of Poker - Quick Intro
+
+There are many variations of Poker games, we'll look at the most common variant called Texas hold'em.
+
+Poker is a card game involving multiple players -
+
+1. Each player is dealt two cards initially.
+2. Then there are cards called community cards, a total of 5 Community cards are available to all players.
+--
+
+3. Those cards are revealed as follows -
+  - Three community cards are revealed first (called 'flop')
+  - Then one more community card is revealed (called 'turn')
+  - Finally, last community card is revealed (called 'river')
+4. At each of the above rounds, players bet, in a round-robin manner.
+5. Another player can 'Call' a player's bet or 'Raise' a player's bet or 'Fold'.
+6. At each stage, all players' bets should be equal.
+7. Player with highest bet or the best hand wins.
+
+---
+### Poker Hands - Overview
+
+1. Each Poker hand is made up of 5 cards.
+2. Using any combination of Player's own cards or community cards (most variations differ in this aspect)
+3. The hands are ranked based on their odds, one with lower odds is ranked higher
+
+Reference: [Poker Probability](https://en.wikipedia.org/wiki/Poker_probability#Frequency_of_5-card_poker_hands)
+--
+![Poker Hands](https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/17579/versions/1/screenshot.jpg "Poker Hands")
+
+Credits: mathworks.com (Through Image Search)
+--
+![Poker Probability](/slides/pycon2019-poker/poker_probability.png "Poker Probability")
+
+Credits: Wikipedia
+---
+### Okay Some Python now!
+
+We'll first start with representing a card, a deck and hands.
+--
+### Representing Cards
+
+Ideas borrowed from [Peter Norvig's code](http://norvig.com)
+
+ * Each Card has got a 'Rank' and a 'Suite'.
+ * Ranks from 1 (for Ace) to 13 for (King) but actually we use 2 to 14 (for Ace)
+ * Suits are Spade, Heart, Diamond, Club.
+ * Thus we can represent a card as Rank+Suite - '2S', 'AD' , 'QC' etc.
+ * Also, for every 'Rank', we'll assign a value (some notion of Score of that card).
+
+--
+### Card Deck
+
+Thus our Deck now will look like -
+
+```python
+suits = ['S', 'H', 'C', 'D']
+cardranks = {'2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8,
+        '9': 9, 'T': 10, 'J':11, 'Q':12, 'K': 13, 'A': 14}
+
+
+def deck(shuffled=False):
+    d =  [''.join((rank, suit)) for suit in suits \
+            for rank in cardranks]
+    if shuffled:
+        random.shuffle(d)
+    return d
+
+
+```
+--
+### Poker Hands
+
+Poker Hands are just - A list of 5 cards - Some Examples
+
+```python
+# Flush (All Spades)
+flush = ['AS', 'JS', '9S', '6S', '2S']
+
+# Full House (2 Aces and 3 Kings)
+full_house = ['AS', 'AD', 'KC', 'KD', 'KH']
+
+# High Card (Ace High)
+high_card = ['AS', 'QC', '9D', '7C', '4H']
+
+```
+---
+### Comparing Poker Hands
+
+We'll start by defining a class called 'PokerHand' and then use operator overloading for comparison.
+
+Strictly, there's no need to 'force' to use a class here, but this comes in handy when we simulate a game.
+
+--
+```python
+class BasePokerHand:
+
+    ...
+    def __init__(self):
+        """ ranks, suits as separate lists from the cards.
+          ordered, is a list of (rank, count) tuples,
+          useful in tie-breaker.
+        """
+        self._cards = None,
+        self._suits = None,
+        self._ranks = None,
+        self._ordered = []
+    ...
+```
+--
+
+We'll need to determine the 'type' of a hand.
+
+Some ways in which we can determine 'type' of a hand -
+
+1. If All the cards are of same suite, it's a flush, this we can represent in python as
+```python
+len(set(suits)) == 1
+```
+2. '4 Of a Kind' and 'Full House' will have at the most 2 ranks (4A-1K or 3A-2K)
+```python
+len(set(ranks)) == 2
+```
+--
+3. If it's a 'Straight' difference between max rank and minimum rank is 4
+```python
+max(ranks) - min(ranks) == 4
+```
+--
+```python
+class PokerHand(BasePokerHand):
+  ...
+    def flush(self):
+        return len(set(self._suits)) == 1
+
+    def straight(self):
+
+        return len(set(self._ranks)) == 5 and \
+                max(self._ranks) - min(self._ranks) == 4 or \
+                (len(set(self._ranks)) == 5 and \
+                    max(self._ranks) == 14 and \
+                    sum(self._ranks) == 28)
+
+    def straight_flush(self):
+        return self.flush() and self.straight()
+
+    ...
+```
+--
+```python
+    ...
+    def four_of_a_kind(self):
+        return len(set(self._ranks)) == 2 and \
+                self.ordered[0][1] == 4
+
+    def full_house(self):
+        return len(set(self._ranks)) == 2 and \
+                self.ordered[0][1] == 3 and \
+                self.ordered[1][1] == 2
+
+    def three_of_a_kind(self):
+        return len(set(self._ranks)) == 3 and \
+                self.ordered[0][1] == 3
+
+    ...
+```
+--
+```python
+    ...
+    def two_pairs(self):
+        return len(set(self._ranks)) == 3 and \
+               self.ordered[0][1] == 2
+
+    def pair(self):
+        return len(set(self._ranks)) == 4
+
+    ...
+```
+--
+
+Once we find out the type of a hand, we'll find the score of a hand and then compare the hands using their scores.
+
+```python
+    def score(self):
+        score = 1 << 0
+        if self.four_of_a_kind(): score <<= 7
+        if self.full_house(): score <<= 6
+        if self.flush(): score <<= 5
+        if self.straight(): score <<= 4
+        if self.three_of_a_kind(): score <<= 3
+        if self.two_pairs(): score <<= 2
+        if self.pair(): score <<= 1
+
+        return score
+
+```
+--
+But we also need to break ties when scores are same, where this `ordered` comes into play.
+Closer look at 'Ordered'
+
+`ordered` is a list of tuples of the type (rank, count) sorted, by count first and rank later.
+
+```python
+    def ordered(self):
+        if self._ordered:
+            return self._ordered
+
+        rank_counts = list(set([(i, self._ranks.count(i)) \
+                for i in self._ranks]))
+        return sorted(rank_counts, key=itemgetter(1, 0),
+                reverse=True)
+```
+--
+This Serves as a tie-breaker. Let's take some examples -
+
+```python
+1. 'HA', 'SA', 'S8', 'C8', 'H8'  - # ordered = [(8,3), (14,2)]
+2. 'HA', 'SA', 'CA', 'S6', 'H6'  - # ordered = [(14,3), (6,2)]
+```
+Thus hand 2 is better than hand one, even though both are 'full house' hands.
+(Trivia: Both hands above are from the movie 'Casino Royale')
+--
+Finally the comparison operator
+```python
+    def __lt__(self, other):
+        if self.score < other.score: return True
+        if self.score > other.score: return False
+
+        for a, b in zip(self.ordered, other.ordered):
+            if a[0] < b[0]:
+                return True
+            if a[0] > b[0]:
+                return False
+
+```
+--
+So far we have looked at comparing Poker hands, now we will look at simulating Poker Games.
+
+---
+### Simulating a Single Poker Game
+
+1. A poker game consists of a Table, with given number of Players
+2. Then there are different actions, initial two cards, we call a 'deal'
+3. Then there are other actions like 'flop', 'turn', 'river' as new
+   cards are revealed.
+--
+
+1. To simulate a Poker Game, we need -
+   - Shuffled Deck
+   - Number of Players
+   - Each Player's initial hand (we call it `MiniPokerHand`)
+   - And actions like 'flop', 'turn', 'river'
+2. We'll start with a class called `PokerTable` (actually it can be better called
+	 as `PokerGame`.)
+3. We are going to look at some built-ins and standard library modules
+   - `sorted` built-in and how to use custom functions to rank
+   - `itertools` modules and `combinations` generator
+--
+
+We keep some additional state for a game, this state includes
+
+1. Which player had the best hand during initial 'deal'
+2. Which player had the best hand after 'flop', 'turn' respectively
+3. Which player had the best hand
+4. Also, things like, how many 'pairs' were there in initial deals or Ace Highs or Cards of Same suite.
+
+This state will be useful when we run simulations and want to find out answers
+--
+As we see there are different stages of a game (at each stage, players on the table Bet)
+
+At each stage, we need to Rank Players. Let's look at how it's done
+--
+```python
+def rank_players(self, pre_flop=False):
+
+    player_hands = {}
+    if pre_flop:
+
+        for i, player in enumerate(self._players):
+            player_hands[i] = MiniPokerHand.from_str( \
+                    " ".join(player.own_cards))
+            if max(player_hands[i].ranks) == 14:
+                self._ace_high_players.append(i)
+            if player_hands[i].score == 2:
+                self._pair_players.append(i)
+            if len(set(player_hands[i].suits)) == 1:
+                self._mini_flush_players.append(i)
+    ...
+```
+--
+```python
+    ...
+    else:
+        for i, player in enumerate(self._players):
+            possible_hands = []
+            for c in combinations(self._community_cards, 3):
+                hand = player.own_cards + list(c)
+                possible_hands.append(PokerHand.from_str(\
+                        " ".join(hand)))
+            player_hands[i] = sorted(possible_hands,
+                    reverse=True)[0]
+
+    players = (sorted(player_hands.items(),
+        key=lambda kv:kv[1], reverse=True))
+
+    for i in range(len(players)):
+        player_id = players[i][0]
+        self._table_ranks[i] = player_id
+
+```
+--
+So a single game would look like -
+```python
+    def run_one_game(self):
+
+        self.deal()
+        self.rank_players(pre_flop=True)
+        self._deal_winner = self._table_ranks[0]
+
+        self.burn_card()
+        self.flop()
+        self.rank_players()
+        self._flop_winner = self._table_ranks[0]
+...
+```
+--
+```
+...
+        self.burn_card()
+        self.turn()
+        self.rank_players()
+        self._turn_winner = self._table_ranks[0]
+
+        self.burn_card()
+        self.river()
+        self.rank_players()
+        self._river_winner = self._table_ranks[0]
+
+        self._game_winner = self._river_winner
+```
+---
+### Simulating a large number of games
+
+1. We are interested in finding out whether there are any interesting statistics in Poker
+2. We just need a driver for the above code.
+--
+### Some results from simulations
+
+Can we develop statistics from looking at simulations of a large number of games?
+
+Are they a function of number of players?
+--
+```
+Simulating for 2 players
+
+1062 of 5000 Games where Ace High during Deal is a winner,
+in which 3911 games had an ace high hand.
+Conditional probability(0.2715)
+
+1419 of 5000 Games where Flush during Deal is a winner,
+in which 4386 games had a flush hand.
+Conditional Probability. (0.3235)
+
+504 of 5000 Games where Pairs during Deal is a winner,
+in which 1937 games had a pair hand.
+Conditional Probablity (0.2602)
+```
+--
+```
+Simulating for 3 players
+
+1036 of 5000 Games where Ace High during Deal is a winner,
+in which 3929 games had an ace high hand.
+Conditional probability(0.2637)
+
+1524 of 5000 Games where Flush during Deal is a winner,
+in which 4440 games had a flush hand.
+Conditional Probability. (0.3432)
+
+503 of 5000 Games where Pairs during Deal is a winner,
+in which 1919 games had a pair hand.
+Conditional Probablity (0.2621)
+```
+--
+```
+Simulating for 4 players
+
+1031 of 5000 Games where Ace High during Deal is a winner,
+in which 3889 games had an ace high hand.
+Conditional probability(0.2651)
+
+1488 of 5000 Games where Flush during Deal is a winner,
+in which 4363 games had a flush hand.
+Conditional Probability. (0.3410)
+518 of 5000 Games where Pairs during Deal is a winner,
+in which 1936 games had a pair hand.
+Conditional Probablity (0.2676)
+```
+--
+```
+Simulating for 5 players
+
+963 of 5000 Games where Ace High during Deal is a winner,
+in which 3860 games had an ace high hand.
+Conditional probability(0.2495)
+
+1445 of 5000 Games where Flush during Deal is a winner,
+in which 4440 games had a flush hand.
+Conditional Probability. (0.3255)
+
+500 of 5000 Games where Pairs during Deal is a winner,
+in which 1909 games had a pair hand.
+Conditional Probablity (0.2619)
+```
+--
+```
+Simulating for 6 players
+
+1005 of 5000 Games where Ace High during Deal is a winner,
+in which 3872 games had an ace high hand.
+Conditional probability(0.2596)
+
+1453 of 5000 Games where Flush during Deal is a winner,
+in which 4412 games had a flush hand.
+Conditional Probability. (0.3293)
+
+520 of 5000 Games where Pairs during Deal is a winner,
+in which 1867 games had a pair hand.
+Conditional Probablity (0.2785)
+```
+--
+```
+Simulating for 7 players
+
+1010 of 5000 Games where Ace High during Deal is a winner,
+in which 3944 games had an ace high hand.
+Conditional probability(0.2561)
+
+1466 of 5000 Games where Flush during Deal is a winner,
+in which 4411 games had a flush hand.
+Conditional Probability. (0.3324)
+
+531 of 5000 Games where Pairs during Deal is a winner,
+in which 1948 games had a pair hand.
+Conditional Probablity (0.2726)
+```
+---
+### Simulation results discussions
+
+Actually interesting statistics are conditional probabilities above -
+
+1. Flush during initial deal is a winner both in absolute and conditional terms.
+2. Pair winners appear to be half that of Ace high winners in absolute terms,
+3. However, if we look at conditional probabilities, they appear to be comparable.
+
+--
+The above statistics can be used along with other table level statistics, like -
+1. Is Flop winner the final winner?
+2. Is Turn winner the final winner?
+
+--
+
+Some interesting observations -
+
+1. The statistics don't appear to change as per number of players in the table (A bit counter intuitive)
+2. Conditional probabilities tell, given you have a type of hand during deal, what are your odds of winning a hand
+
+--
+
+Some thoughts on how these stats can be used -
+
+1. You can determine strategies, where at each stage, you can determine - what's a risk involved while placing bets?
+2. You can refine that as game progresses - Bayesian thinking (Initial Mini Flush, Possible Flop Winner etc.)
+
+---
+### References
+
+1. Texas Hold'em Poker (https://en.wikipedia.org/wiki/Texas_hold_'em)
+2. Poker Probability (https://en.wikipedia.org/wiki/Poker_probability)
+3. Code Above (https://github.com/gabhijit/pycon)
+
+---
+### Thanks
+
+Feel free to get in touch `gabhijit@hyphenos.io`
+---
+                    </script>
+
+ </section>
+
+      </div>
+    </div>
+
+    <script src="/slides/js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '/slides/plugin/markdown/marked.js' },
+          { src: '/slides/plugin/markdown/markdown.js' },
+          { src: '/slides/plugin/notes/notes.js', async: true },
+          { src: '/slides/plugin/highlight/highlight.js', async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>
