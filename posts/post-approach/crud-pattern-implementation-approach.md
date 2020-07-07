@@ -11,12 +11,7 @@ BookForm component is used to create or update a book entity. It needs to implem
 
 The validation process is accomplished in ordered way. Firstly, the rules for validation are defined in a `formFieldAttributes` object in the form of attributes. Then, the input data is validated against these attributes by `formValidator()` function which generates and returns `formError` object. The errors from API response are generated in similar manner by `apiErrorsToFormFields()` function as `apiErrors` object. `formError` and `apiErrors` are collection of error objects where each object is in {fieldId: {error: true/false, helperText: "error text"}} format. Lastly, the generated errors are then mapped to the related field using its `id` attribute by `fieldError()` and `fieldHelperText()` functions. A `key` attribute of each field from `formFieldAttributes` object is assigned as `id` to respective field. This attribute is used to generate error on both sides and map generated errors to respective field.
 
-Notice, we are following the same pattern for generating and mapping errors on client-side and server-side.
-
-### Major functions of form (Brief overview)
-1. #### Form field validation as per defined rules
-2. #### Generating and mapping errors to related fields
-3. #### Generating and Mapping API response errors to related fields
+Here, we are following the same pattern for generating and mapping errors from client-side and server-side. Now, we will check the above mentioned actions in detail
 
 
 ### `apiToFormFieldIDs` object to specify validation rules and customise field attributes
