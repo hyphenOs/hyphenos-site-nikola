@@ -1,7 +1,7 @@
 .. title: Device Authentication and Secure Communication - Design
 .. slug: device-secure-communication-design
 .. date: 2020-07-08 15:32:21 UTC+05:30
-.. tags:
+.. tags: Systems, Security
 .. category:
 .. link:
 .. status:
