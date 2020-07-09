@@ -32,34 +32,31 @@ React supports Unidirectional/One-Way Data Flow only. It means, the data is pass
 
 A form component creates or updates an entity on the server by performing API actions. In order to do this, it needs to fulfill following requirements:
 
-- Form validation
-- Displaying validation errors of specific field(if any)
-- Displaying API response errors of specific field on the UI (if any)
+- Validate form and display validation errors (if any) of specific field
+- Display API response errors (if any) of specific field on the UI
 
 We can fulfill these requirements by using a `formFieldAttributes` object that defines validation rules for each field. We will check its details in the next section.
 
 ## `formFieldAttributes` object
 
-It defines custom validation rules for every field in `{fieldName: { attr1: value1, ..., attrN: valueN }}` format. The rules can be specified as following :
+It defines custom validation rules for every field in `{fieldName: { attr1: value1, ..., attrN: valueN }}` format. The rules can be specified as attributes as following :
 
 1. `key`: Used to generate and map error to the respective field
 2. `required`: Defines whether an empty field is allowed or not
 3. `customValidator()`: Provides custom validation logic for each field. Returns an error object in `{key: { error: true, helperText:"text" }}` format.
 
-
 ```javascript
 const formFieldAttributes = {
-  title: {
-    key: "title",
-    required: true,
+  title: {          // value of key ("title") is same as this (convention)
+    key: "title",   // Should be unique as it is used as field 'id'
+    required: true, // Whether an empty field is allowed or not
     customValidator: value =>
-      value.length > 100
-        ? { helperText: "enter less than 100 characters", error: true }
-        : { helperText: "", error: false }
+      value.length > 100 // Custom validation logic
+        ? { helperText: "enter less than 100 characters", error: true } // Object with error
+        : { helperText: "", error: false } // Object without error
   },
   ...
 }
-
 
 // Using 'key' as argument to fieldError() and fieldHelperText()
 // to map error and helperText
@@ -77,16 +74,29 @@ const formFieldAttributes = {
 
 `formValidator()` function uses this object to validate form and generate errors (if any). We will check its functioning in the next section.
 
+## Form Validation (`formValidator()` function)
 
-## `formValidator()` function
-How it validates form and generates `formError` object using `formFieldAttributes`
+How it validates form and generates `formErrors` object using `formFieldAttributes`
 
-## `apiErrorsToFormField()` function
+## API Errors Reporting (`apiErrorsToFormField()` function)
+
 How it generates `apiErrors` object using API response errors
 
-## `formErrors` and `apiErrors` objects
+## Error Reporting Objects (`formErrors` and `apiErrors` objects)
+
 Contain errors in `{key: { error: true, helperText:"text" }}` format
 
+## Mapping errors to field (`fieldError()` and `FieldHelperText()`)
 
-## `fieldError()` and `FieldHelperText()`
 How they combine `formErrors` and `apiErrors` and map errors to respective field using `key` property
+
+# Conclusion
+
+We checked how to achieve Inverse Data Flow in the `BookTable` component and a self contained form component that does
+validation and error mapping internally. This was the second post in "CRUD pattern" series. We will check another React post soon.
+
+Feel free to check the source code here:
+
+- [front-end (React)](https://github.com/hyphenOs/library-frontend)
+- [back-end (Django REST)](https://github.com/hyphenOs/library-backend)
+
