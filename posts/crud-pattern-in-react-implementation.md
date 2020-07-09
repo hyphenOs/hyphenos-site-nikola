@@ -37,3 +37,56 @@ A form component creates or updates an entity on the server by performing API ac
 - Displaying API response errors of specific field on the UI (if any)
 
 We can fulfill these requirements by using a `formFieldAttributes` object that defines validation rules for each field. We will check its details in the next section.
+
+## `formFieldAttributes` object
+
+It defines custom validation rules for every field in `{fieldName: { attr1: value1, ..., attrN: valueN }}` format. The rules can be specified as following :
+
+1. `key`: Used to generate and map error to the respective field
+2. `required`: Defines whether an empty field is allowed or not
+3. `customValidator()`: Provides custom validation logic for each field. Returns an error object in `{key: { error: true, helperText:"text" }}` format.
+
+
+```javascript
+const formFieldAttributes = {
+  title: {
+    key: "title",
+    required: true,
+    customValidator: value =>
+      value.length > 100
+        ? { helperText: "enter less than 100 characters", error: true }
+        : { helperText: "", error: false }
+  },
+  ...
+}
+
+
+// Using 'key' as argument to fieldError() and fieldHelperText()
+// to map error and helperText
+<form id="bookForm">
+    <TextField
+        id={formFieldAttributes.title.key}
+        error={this.fieldError(formFieldAttributes.title.key)}
+        helperText={this.fieldHelperText(formFieldAttributes.title.key)}
+        ...
+    />
+...
+</form>
+
+```
+
+`formValidator()` function uses this object to validate form and generate errors (if any). We will check its functioning in the next section.
+
+
+## `formValidator()` function
+How it validates form and generates `formError` object using `formFieldAttributes`
+
+## `apiErrorsToFormField()` function
+How it generates `apiErrors` object using API response errors
+
+## `formErrors` and `apiErrors` objects
+Contain errors in `{key: { error: true, helperText:"text" }}` format
+
+
+## `fieldError()` and `FieldHelperText()`
+How they combine `formErrors` and `apiErrors` and map errors to respective field using `key` property
