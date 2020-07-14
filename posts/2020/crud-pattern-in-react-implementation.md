@@ -111,11 +111,13 @@ In the next section, we will see how errors returned from API response are simil
 
 ## API Errors Reporting (`apiErrorsToFormField()` function)
 
-How it generates `apiErrors` object using API response errors
+Collecting field specific errors received from API response is done by `apiErrorsToFormFields()` function in very similar manner to that of `formValidator()`. For every field error, an error object (as mentioned in previous section) is added in `apiErrors` object. An error generating pattern can be clearly observed here.
+
+In the next section, we will see how the errors from `formErrors` and `apiErrors` are mapped to the related field.
 
 ## Mapping errors to field (`fieldError()` and `FieldHelperText()`)
 
-How they combine `formErrors` and `apiErrors` and map errors to respective field using `key` property
+The errors from `formErrors` and `apiErrors` are combined and mapped to related field by `fieldError()` and `fieldHelperText()` functions. An `id/key` argument is used to check if the field has an error or helperText. Errors from `apiErrors` are mapped only when there are no errors in `formErrors` object.
 
 # Conclusion
 
@@ -126,4 +128,3 @@ Feel free to check the source code here:
 
 - [front-end (React)](https://github.com/hyphenOs/library-frontend)
 - [back-end (Django REST)](https://github.com/hyphenOs/library-backend)
-
