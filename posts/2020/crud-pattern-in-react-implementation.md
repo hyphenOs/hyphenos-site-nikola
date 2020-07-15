@@ -110,17 +110,17 @@ const formValidator = (formFieldAttributes, userInput, isEditForm) => {
 };
 ```
 
-In fact, we have used the `formValidator` as a common component across several forms in our implementation and works quite well here. It's possible depending upon the complexity of validation logic, this component cannot be made a common component across several forms, in such cases, it should be part of the `Form` component, to keep the functionality well contained.
+We have used the `formValidator` as a common component across several forms. It's possible depending upon the complexity of validation logic, this component cannot be made a common component across several forms. In such cases, it should become part of the `Form` component, to keep the functionality contained.
 
 In the next section, we will see how errors returned from API response are similarly mapped to UI fields.
 
 ## API Errors Reporting (`apiErrorsToFormField()` Function)
 
-Collecting field specific errors received from API response is done by `apiErrorsToFormFields()` function in very similar manner to that of `formValidator()`. For every field error, an error object (as mentioned in previous section) is added in `apiErrors` object. Thus, using the same object (`formFieldAttributes`) one can map both client-side and server-side errors to UI fields in a consistent manner.
+Collecting field specific errors received from API response is done by `apiErrorsToFormFields()` function in very similar manner to that of `formValidator()`. For every field error, an error object (as mentioned in previous section) is added in `apiErrors` object. This way, using the `formFieldAttributes` one can map both client-side and server-side errors to UI fields in a consistent manner.
 
 In the next section, we will see how the errors from `formErrors` and `apiErrors` are mapped to the related field.
 
-## Mapping Errors (`fieldError()` and `FieldHelperText()` Helper Functions)
+## Mapping Errors (`fieldError()` and `fieldHelperText()` Helper Functions)
 
 `formErrors` and `apiErrors` (which are similar objects) are used by these helper functions to display the field specific errors on UI. To identify the field to which the error is mapped, the `key` attribute (from `formFieldAttributes` object) is used. The code that performs this is fairly straight forward and code for `fieldError` helper function is shown below -
 
@@ -134,12 +134,12 @@ In the next section, we will see how the errors from `formErrors` and `apiErrors
 ```
 # Conclusion
 
-We checked how to achieve Inverse Data Flow in the `BookTable` component and a self-contained form component that does
-validation and error mapping internally, without leaking this functionality outside the component. So to conclude  -
+We checked how to achieve Inverse Data Flow in the `BookTable` component and a self-contained `BookForm` component that does
+validation and error mapping internally, without leaking this functionality outside the component. So to conclude we can  -
 
-1. Think of Dashboard applications as **CRUD** for different objects.
-2. Structure individual component as a Parent Component defining actions and wrapping UI components.
-3. UI Components should be self-contained and their logic should not be leaking out (e.g. Validation logic should be within a Form component where it is 'required'.)
+1. Think of Dashboard applications as **CRUD** actions for different objects.
+2. Define all the CRUD actions in a parent component which passes these actions along with data to child components.
+3. Components should be self-contained and their logic should not be leaking out (e.g. Validation logic should be handled within a Form component where it is required)
 
 Feel free to check the source code here:
 
