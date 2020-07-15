@@ -11,20 +11,20 @@
 
 # Overview
 
-In the <a href="/blog/2020/crud-pattern-in-react-introduction">previous post</a>, we checked the structure of `Books` component. The `Book` component implements CRUD actions and passes these actions and data (retrieved from API) to its child components `BookTable` and `BookForm`. In this post, We will check implementation details of `BookTable` and `BookForm` components.
+In the <a href="/blog/2020/crud-pattern-in-react-introduction">previous post</a>, we checked the structure of `Books` component. The `Books` component implements CRUD actions and passes these actions and data (retrieved from API) to its child components `BookTable` and `BookForm`. In this post, We will check the implementation details of `BookTable` and `BookForm` components.
 
 # `BookTable` Component - Implementation
 
-A table view is generally used to provide summary of the data. It may also provide an interface (e.g. button) to trigger _Update_ and _Delete_ actions on the selected data record. The `BookTable` component presents book entities in a summary view in table format. It triggers _Update_ and _Delete_ actions using `showEditForm` and `performDelete` callback functions, passed as `props` by the `Books` component (parent). It also passes the data required for the actions (book object, book id) back to the parent component.
+A table view is generally used to provide summary of the data. It may also provide an interface (e.g. button) to trigger _Update_ and _Delete_ actions on the selected data record. The `BookTable` component presents book entities in a summary view in table format. It triggers _Update_ and _Delete_ actions using `showEditForm` and `performDelete` callback functions passed as `props` by the `Books` component (parent). It also passes the data required for the actions (book object, book id) back to the parent component.
 
-React supports Unidirectional/One-Way Data Flow only. It means, the data is passed from parent to child as `props` which are immutable arguments. Our actions (update, delete) are defined in the `Books` component (parent), but we need the data (selected book id or object) from `BookTable` component (child) to perform the actions. We can achieve this by explicitly invoking Inverse Data Flow from `BookTable` component to `Books` component.
+React supports Unidirectional/One-Way Data Flow only. It means the data is passed from parent to child as `props` which are immutable arguments. Our actions (update, delete) are defined in the `Books` component (parent), but we need the data (selected book id or object) from `BookTable` component (child) to perform the actions. We can achieve this by explicitly invoking Inverse Data Flow from `BookTable` component to `Books` component.
 
 ## Inverse Data Flow
 
 - A callback function (`openForm()` or `delete()`) defined in the parent (`Books`) component is passed as props to the child (`BookTable`) component.
 - The function is invoked by the child component for an event. e.g. to trigger update or delete action (function invoke) on button click (event).
 - The child component can pass data (book id or book object) as an argument to the callback function. As the callback function is defined in the parent, the data is made available to the parent component, thus achieving _Inverse Data Flow_.
-- The passed data can then be used by the parent component to update internal state which may potentially re-render the page.
+- The passed data can then be used by the parent component to update the internal state which may potentially re-render the page.
 
 `BookTable` component is fairly straightforward and we have covered its usage to demonstrate the *Inverse Data Flow* concept in this post. Its entire implementation is available [here](https://github.com/hyphenOs/library-frontend/blob/master/src/pages/books/components/BookTable.js)
 
@@ -75,7 +75,7 @@ const formFieldAttributes = {
 3. `customValidator()`: Provides custom validation logic for each field. Returns an error object in `{key: { error: true, helperText:"text" }}` format.
 
 
-`formValidator()` function uses this object to validate form and generate errors (if any). We will check its functioning in the next section.
+`formValidator()` function uses this object to validate the form and generate errors (if any). We will check its functioning in the next section.
 
 ## Form Validation (`formValidator()` Function)
 
@@ -110,17 +110,17 @@ const formValidator = (formFieldAttributes, userInput, isEditForm) => {
 };
 ```
 
-In fact, we have used the `formValidator` as a common component across several forms in our implementation and works quite well here. It's possible depending upon the complexity of validation logic, this component cannot be made a common component across several forms, in such cases, it should be part of the `Form` component, to keep the functionality well contained.
+We have used the `formValidator` as a common component across several forms. It's possible depending upon the complexity of validation logic, this component cannot be made a common component across several forms. In such cases, it should become part of the `Form` component, to keep the functionality contained.
 
 In the next section, we will see how errors returned from API response are similarly mapped to UI fields.
 
 ## API Errors Reporting (`apiErrorsToFormField()` Function)
 
-Collecting field specific errors received from API response is done by `apiErrorsToFormFields()` function in very similar manner to that of `formValidator()`. For every field error, an error object (as mentioned in previous section) is added in `apiErrors` object. Thus, using a same object (`formFieldAttributes`) one can map both client side and server side errors to UI fields in a consistent manner.
+Collecting field specific errors received from API response is done by `apiErrorsToFormFields()` function in very similar manner to that of `formValidator()`. For every field error, an error object (as mentioned in previous section) is added in `apiErrors` object. This way, using the `formFieldAttributes` one can map both client-side and server-side errors to UI fields in a consistent manner.
 
 In the next section, we will see how the errors from `formErrors` and `apiErrors` are mapped to the related field.
 
-## Mapping Errors (`fieldError()` and `FieldHelperText()` Helper Functions)
+## Mapping Errors (`fieldError()` and `fieldHelperText()` Helper Functions)
 
 `formErrors` and `apiErrors` (which are similar objects) are used by these helper functions to display the field specific errors on UI. To identify the field to which the error is mapped, the `key` attribute (from `formFieldAttributes` object) is used. The code that performs this is fairly straight forward and code for `fieldError` helper function is shown below -
 
@@ -134,12 +134,12 @@ In the next section, we will see how the errors from `formErrors` and `apiErrors
 ```
 # Conclusion
 
-We checked how to achieve Inverse Data Flow in the `BookTable` component and a self contained form component that does
-validation and error mapping internally, without leaking this functionality outside the component. So to conclude  -
+We checked how to achieve Inverse Data Flow in the `BookTable` component and a self-contained `BookForm` component that does
+validation and error mapping internally, without leaking this functionality outside the component. So to conclude we can  -
 
-1. Think of Dashboard applications as **CRUD** for different objects.
-2. Structure individual component as a Parent Component defining actions and wrapping UI components.
-3. UI Components, should be self contained and their logic should not be leaking out (e.g. Validation logic should be within a Form component where it is 'required'.)
+1. Think of Dashboard applications as **CRUD** actions for different objects.
+2. Define all the CRUD actions in a parent component which passes these actions along with data to child components.
+3. Components should be self-contained and their logic should not be leaking out (e.g. Validation logic should be handled within a Form component where it is required)
 
 Feel free to check the source code here:
 
