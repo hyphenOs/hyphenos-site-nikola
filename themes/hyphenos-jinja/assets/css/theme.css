@@ -739,3 +739,7 @@ a {
 a:hover {
     color: #296129;
 }
+
+.blog-content a {
+    text-decoration: underline;
+}
