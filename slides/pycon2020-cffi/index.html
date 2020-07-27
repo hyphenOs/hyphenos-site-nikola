@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="date" content="2019-06-17">
+
+    <title>Python for Simulating Poker Games</title>
+
+    <link rel="stylesheet" href="/slides/css/reset.css">
+    <link rel="stylesheet" href="/slides/css/reveal.css">
+    <link rel="stylesheet" href="/slides/css/theme/hyphenos.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="/slides/lib/css/monokai.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '/slides/css/print/pdf.css' : '/slides/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+
+<section>
+	<h3>Python and `cffi` </h3>
+			<h4>Visualizing Network Traces</h4>
+      <p> by Abhijit Gadgil</p>
+
+</section>
+ <section data-markdown data-separator="^---" data-separator-vertical="^--">
+                       <script type="text/template">
+### About Me
+
+1. hyphenOs Software Labs - Systems Software.
+2. Mostly programming in Python for fun as well as for work.
+3. Like Python for quickly trying out ideas
+4. Rust noob
+
+---
+
+### What You'll Get out of this talk?
+
+Write Python bindings for your favourite C Library in an afternoon and not in a couple of weeks or months! :-)
+---
+### What we'll look at
+ 1. A bit of background and how this got started.
+ 2. Choices for writing Python bindings
+ 3. Working with `cffi` - Three stages `dev`, `deploy` and `runtime`.
+ 4. `cffi` Some more practical advice.
+ 5. Demo (Time Permitting)
+ 6. Questions - Mostly offline.
+---
+### Background
+
+
+Someone approached me for dumping packets in Elastic Search for being able to do 'analytics' on them.
+--
+Why not
+
+```shell
+tshark -T json ...... | curl -X POST ....
+
+```
+or
+
+Elastic's - PacketBeat?
+--
+
+What you really need is - Wireshark's Dissectors in Python World.
+
+---
+### Choices for writing Python Bindings (WIP)
+
+1. Ctypes
+--
+2. `cffi`
+--
+3. `SWIG`
+--
+4. Classic Python API
+---
+### `cffi` Features Overview (WIP)
+
+ABI and API Modes - Which one to use when?
+--
+Examples:
+TBD
+---
+### `cffi` Practical Advice
+
+Three Stages -
+
+1. development stage
+2. build/packaging stage
+3. runtime stage.
+
+---
+
+### Development Stage
+
+In the development stage, one determines which underlying APIs to expose through our bindings
+
+(Notes: It's not necessary to wrap everything and expose those APIs from the libraries)
+
+This is usually done using `cdef`s - Which means 'C definitions' for your bindings.
+
+(Notes: These definitions are usually picked up from the header files of the library that
+we are preparing bindings for.)
+--
+
+A little bit about C - Libraries -
+
+1. A 'C' Libraries header file is it's API essentially. But there are really two parts
+   to the API,
+   * `struct`s, `const`s, `typedef`s, `define`s etc
+   * functions
+
+A good practice to follow is have two `cdef` strings per header files -
+
+For example let's say you are preparing `cdef`s from a file called `spam/foo.h`
+where, `spam` is the top level of your library's include files.
+--
+```c
+// Contents of "spam/foo.h"
+
+#ifndef __SPAM_FOO_H
+#define __SPAM_FOO_H
+
+const int bar = 42;
+
+void spam_all();
+
+
+#endif // __SPAM_FOO_H
+
+```
+
+--
+One can prepare two `cdef`s as follows -
+
+```python
+spam_foo_h_types_cdef = """
+const int bar = 42;
+"""
+
+spam_foo_h_func_cdef = """
+void spam_all();
+"""
+```
+
+--
+and then use it as follows -
+
+```python
+
+from cffi import FFI
+
+wrapper_ffi = FFI()
+
+wrapper_ffi.cdef(spam_foo_h_types_cdef)
+wrapper_ffi.cdef(spam_foo_h_funcs_cdef)
+
+....
+
+```
+--
+
+Advantage:
+
+1. Helps to avoid leaking unwanted definitions.
+2. Readability of your `cdef` code is improved a lot.
+3. For really big libraries - easy to re-organize the `cdef` as above.
+
+--
+
+Once you've defined your `cdef`s, we either `verify` or `set_source` to compile it.
+
+1. Use `verify` to quickly try out stuff, but `set_source` when building.
+2. Typically, have a separate `wrapper_builder` module that you use in your `setup.py`
+3. Also, define `__main__` where you can `verify` your FFI bindings.
+
+--
+Example:
+
+```python
+
+# Code from wishpy/libpcap/src/pcap_builder.py
+# Run it as `python -m wishpy.libpcap.src.pcap_builder`
+
+from wishpy.libpcap.src.pcap import (
+        libpcap_ffi,
+        _sources,
+        _extra_link_args,
+        _extra_compile_args)
+
+
+
+if __name__ == '__main__':
+
+    libpcap_lib = libpcap_ffi.verify(_sources,
+            extra_link_args=_extra_link_args,
+            extra_compile_args=_extra_compile_args)
+
+    print(libpcap_lib)
+```
+--
+When the above module works, we know that there is a good chance that when we package our module through setuptools it'll work on a target machine if compatible libraries are found.
+--
+
+Also, start small, so if your wrapped library has a function like say `print_version`, just do enough to make sure that you can get that working in Python first.
+
+Subsequently it just becomes adding more functions and types! :-)
+
+---
+### Build/Distribution Stage
+
+This is essentially about how the bindings will work on a computer other than the one where they were developed. :-)
+
+1. Use `src` and `lib` as separate directories (so this is consistent with mental model of C src/lib)
+2. Use the `wrapper_builder` as defined above in your `setup.py`
+
+`cffi` defines additional params to `setup` function called `cffi_modules`. The `wrapper_builder` module discussed above is included here.
+
+
+---
+### Runtime stage
+
+This is the stage, where actual users of your bindings will work with your bindings.
+
+Often that user is you! :-) (Perhaps only you!)
+
+--
+
+### Providing your own API
+
+1. Generally when you wrap a library, you'll typically want to provide your own API and not simply wrap the 'C' API.
+
+2. But also make that available to someone who just wants that! :-)
+
+3. Your API should 'think in Python' and not 'think in wrapped library'. (Often the wrapped library's API can be terrible and you want to hide the ugly parts from your users! :-) ).
+
+4. For users of your library, often wrapped library is just a detail they don't even have to worry about (as long as `pip install your_awesome_wrapper` works)
+
+--
+Example:
+
+1. `wishpy` wraps `libpcap` and `wireshark` C libraries in Python.
+2. While the bindings are available as it is - if a user chooses,
+3. We define our own API
+   * `Capturer` - for capturing live packets from network device
+   * `Dissector` - for dissecting packets
+4. Users need to know only about the APIs we provide.
+
+--
+### Supporting multiple versions of library
+
+One advantage of defining your own APIs is - you can wrap multiple versions of 'C' libraries under your APIs and provide consistent interface to the users.
+
+Here the separation above into `src` and `lib` becomes quite handy -
+
+* `src` is used to build bindings on the target machine.
+  - `src` directory has per version `cdef`s and `builder` modules.
+* `lib` can wrap your own API along with the wrappers for the 'C' library.
+
+--
+
+Generally -
+
+1. define `api.py` (or a more descriptive module name) for your APIs.
+2. and `_wrapper.py` for the wrapped library and details of managing multiple versions of bindings etc. are handled here.
+3. One advantage is - tomorrow if a better library comes and you already have enough users, you can still replace the underlying 'wrapped' libraries.
+
+---
+### Not So FAQs (WIP)
+
+- Keeping in mind about the GC and making sure your objects remain in scope (`cffi` has a pretty good documentation about it.)
+- Copying Data to/from C types.
+
+---
+### Demo (optional)
+
+Now we'll look at a quick demo of something that works. A simple example -
+
+- We pick packets off an interface, parse them and push them to Redis. (You can push them to Kafka or Elastic or Anything.)
+
+
+---
+</script>
+</section>
+
+      </div>
+    </div>
+
+    <script src="/slides/js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '/slides/plugin/markdown/marked.js' },
+          { src: '/slides/plugin/markdown/markdown.js' },
+          { src: '/slides/plugin/notes/notes.js', async: true },
+          { src: '/slides/plugin/highlight/highlight.js', async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>
