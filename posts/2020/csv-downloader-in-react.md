@@ -26,11 +26,11 @@ We'll also see a couple of other benefits of doing this in the front-end.
 
 # Main Idea
 
-The main challenge we face, with the _Ajax_ requests is that - we have to 'trigger' download request as a user initiated request, rather than it being a simple _Ajax_ request. There is a neat trick that can be used using the [`Blob` object](https://developer.mozilla.org/en-US/docs/Web/API/Blob){:target="_blank"} as shown on the MDN site. So essentially -
+The main challenge we face, with the _Ajax_ requests is that - we have to 'trigger' download request as a user initiated request, rather than it being a simple _Ajax_ request. There is a neat trick that can be used using the [`Blob` object](https://developer.mozilla.org/en-US/docs/Web/API/Blob){:target="\_blank"} as shown on the MDN site. So essentially -
 
 1. Convert the data returned by API as a String.
 2. Create a `Blob` object using this string.
-3. Create and Serve Url for the Blob object using [`URL.createObjectURL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL){:target="_blank"} method.
+3. Create and Serve Url for the Blob object using [`URL.createObjectURL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL){:target="\_blank"} method.
 4. Make the link downloadable, also by giving a file name if required.
 
 This is shown in the code below.
@@ -105,7 +105,7 @@ if (mapper && sorter) {
 We have seen, rather than taking an API based approach alone, implementing a functionality like downloading `CSV` in the front-end, not only allows us to work with our own as well as third party API, but also, allows us to implement additional features. Also, one more benefit of writing such a component is, this component can be reused across several parts of the application, if there are many parts that require this functionality. With some additional effort, it's quite possible to make this component as a completely reusable component completely decoupled from the application logic.
 
 A full source code for an example implementation of this component is available at -
-- [CSVDownloader React Component](https://github.com/hyphenOs/library-frontend/blob/master/src/common/components/CSVDownloader.js){:target="_blank"}
+- [CSVDownloader React Component](https://github.com/hyphenOs/library-frontend/blob/master/src/common/components/CSVDownloader.js){:target="\_blank"}
 
 # Thanks
 

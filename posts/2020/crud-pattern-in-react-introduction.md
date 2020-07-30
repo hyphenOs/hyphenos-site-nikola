@@ -169,7 +169,7 @@ render(){
 As can be seen above, the `Books` component is actually a concrete implementation of the base component described earlier. There are other details about the Book components that we are not covering in this post. The actual implementation of this component with other boilerplate can be seen in the source code of the library application on following URLs.
 
 
-- [front-end (React)](https://github.com/hyphenOs/library-frontend)
-- [back-end (Django REST)](https://github.com/hyphenOs/library-backend)
+- [front-end (React)](https://github.com/hyphenOs/library-frontend){:target="\_blank"}
+- [back-end (Django REST)](https://github.com/hyphenOs/library-backend){:target="\_blank"}
 
 *PS* In a future post, we will describe the implementation of this pattern using functional components and React Hooks.

@@ -11,7 +11,7 @@
 
 # Introduction
 
-Birthday paradox problem discusses that in a group of randomly chosen people, what is the probability that two or more people will share their birthdays? [Wikipedia](https://en.wikipedia.org/wiki/Birthday_problem) has got an extensive mathematical treatment of the problem and it surely by itself is worth a read. But somewhat quite un-intuitive result is if there are about 25 people in a room, the probability that at-least two of them will share their birthday is about half. The result might sound very surprising, but is indeed true.
+Birthday paradox problem discusses that in a group of randomly chosen people, what is the probability that two or more people will share their birthdays? [Wikipedia](https://en.wikipedia.org/wiki/Birthday_problem){:target="\_blank"} has got an extensive mathematical treatment of the problem and it surely by itself is worth a read. But somewhat quite un-intuitive result is if there are about 25 people in a room, the probability that at-least two of them will share their birthday is about half. The result might sound very surprising, but is indeed true.
 
 Let's say we want to verify that this result is indeed true? How can we go about it?
 
