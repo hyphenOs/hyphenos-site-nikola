@@ -26,7 +26,7 @@ React supports Unidirectional/One-Way Data Flow only. It means the data is passe
 - The child component can pass data (book id or book object) as an argument to the callback function. As the callback function is defined in the parent, the data is made available to the parent component, thus achieving _Inverse Data Flow_.
 - The passed data can then be used by the parent component to update the internal state which may potentially re-render the page.
 
-`BookTable` component is fairly straightforward and we have covered its usage to demonstrate the *Inverse Data Flow* concept in this post. Its entire implementation is available [here](https://github.com/hyphenOs/library-frontend/blob/master/src/pages/books/components/BookTable.js)
+`BookTable` component is fairly straightforward and we have covered its usage to demonstrate the *Inverse Data Flow* concept in this post. Its entire implementation is available [here](https://github.com/hyphenOs/library-frontend/blob/master/src/pages/books/components/BookTable.js){:target="\_blank"}
 
 Next, we will look at the `BookForm` component implementation.
 
@@ -143,5 +143,5 @@ validation and error mapping internally, without leaking this functionality outs
 
 Feel free to check the source code here:
 
-- [front-end (React)](https://github.com/hyphenOs/library-frontend)
-- [back-end (Django REST)](https://github.com/hyphenOs/library-backend)
+- [front-end (React)](https://github.com/hyphenOs/library-frontend){:target="\_blank"}
+- [back-end (Django REST)](https://github.com/hyphenOs/library-backend){:target="\_blank"}
