@@ -31,11 +31,15 @@
 <section>
 	<h3>Python and `cffi` </h3>
 			<h4>Visualizing Network Traces</h4>
-      <p> by Abhijit Gadgil</p>
+      <h4 class="hosblue"> by Abhijit Gadgil</h4>
 
 </section>
- <section data-markdown data-separator="^---" data-separator-vertical="^--">
-                       <script type="text/template">
+<section data-markdown data-separator="^---"
+	 data-separator-vertical="^--"
+	 data-separator-notes="^Notes:">
+
+	<script type="text/template">
+
 ### About Me
 
 1. hyphenOs Software Labs - Systems Software.
@@ -85,13 +89,22 @@ What you really need is - Wireshark's Dissectors in Python World.
 3. `SWIG`
 --
 4. Classic Python API
+--
+Why `cffi` ?
+From [`cffi` Goals](https://cffi.readthedocs.io/en/latest/goals.html)
+
+> The goal is to call C code from Python without learning a 3rd language: existing alternatives require users to learn domain specific language (Cython, SWIG) or API (ctypes). The CFFI design requires users to know only C and Python, minimizing the extra bits of API that need to be learned.
 ---
 ### `cffi` Features Overview (WIP)
 
 ABI and API Modes - Which one to use when?
 --
-Examples:
-TBD
+- Normally, You'll use API mode.
+
+- ABI mode is like `ctypes.cdll`
+  - This is runtime only, cannot build/distribute (well almost!).
+  - Good if you only need a couple of APIs from a library.
+
 ---
 ### `cffi` Practical Advice
 
@@ -105,14 +118,18 @@ Three Stages -
 
 ### Development Stage
 
+Choose the Library's APIs that you need and want to be part of your bindings.
+
+Notes:
 In the development stage, one determines which underlying APIs to expose through our bindings
+It's not necessary to wrap everything and expose those APIs from the libraries
 
-(Notes: It's not necessary to wrap everything and expose those APIs from the libraries)
+--
 
-This is usually done using `cdef`s - Which means 'C definitions' for your bindings.
+Define `cdef`s - Which means 'C definitions' for your bindings.
 
-(Notes: These definitions are usually picked up from the header files of the library that
-we are preparing bindings for.)
+Notes: These definitions are usually picked up from the header files of the library that
+we are preparing bindings for. Good old Ctrl-C/Ctrl-V is your friend here.
 --
 
 A little bit about C - Libraries -
@@ -122,7 +139,7 @@ A little bit about C - Libraries -
    * `struct`s, `const`s, `typedef`s, `define`s etc
    * functions
 
-A good practice to follow is have two `cdef` strings per header files -
+2. Split `cdef`s into two - `types_cdef` and `funcs_cdef`
 
 For example let's say you are preparing `cdef`s from a file called `spam/foo.h`
 where, `spam` is the top level of your library's include files.
@@ -143,7 +160,7 @@ void spam_all();
 ```
 
 --
-One can prepare two `cdef`s as follows -
+One can define two `cdef`s as follows -
 
 ```python
 spam_foo_h_types_cdef = """
@@ -179,10 +196,22 @@ Advantage:
 3. For really big libraries - easy to re-organize the `cdef` as above.
 
 --
+`cffi` provides two APIs to 'compile' - `verify` / `set_source`
 
-Once you've defined your `cdef`s, we either `verify` or `set_source` to compile it.
+Both do similar jobs -
 
-1. Use `verify` to quickly try out stuff, but `set_source` when building.
+Use your `cdef`s to generate a `.c` file with boiler-plate code and compile.
+
+--
+
+Once you've defined `cdef`s -
+
+Next step is to `verify` or `set_source` to compile.
+
+*ie* the `cdef`s build on your machine. (Note: requires dev tools.)
+
+--
+1. Use `verify` to quickly try out stuff, but `set_source` when building, distributing.
 2. Typically, have a separate `wrapper_builder` module that you use in your `setup.py`
 3. Also, define `__main__` where you can `verify` your FFI bindings.
 
@@ -190,31 +219,30 @@ Once you've defined your `cdef`s, we either `verify` or `set_source` to compile 
 Example:
 
 ```python
-
 # Code from wishpy/libpcap/src/pcap_builder.py
 # Run it as `python -m wishpy.libpcap.src.pcap_builder`
 
 from wishpy.libpcap.src.pcap import (
-        libpcap_ffi,
-        _sources,
-        _extra_link_args,
-        _extra_compile_args)
-
-
+        libpcap_ffi, _sources, _extra_link_args, _extra_compile_args)
 
 if __name__ == '__main__':
-
     libpcap_lib = libpcap_ffi.verify(_sources,
             extra_link_args=_extra_link_args,
             extra_compile_args=_extra_compile_args)
 
     print(libpcap_lib)
+
+		# You can use library's API now as say -
+		libpcap_lib.pcap_open(...)
 ```
 --
-When the above module works, we know that there is a good chance that when we package our module through setuptools it'll work on a target machine if compatible libraries are found.
+So if this works, we are ready for next stage - 'build/distribution' -
+
 --
 
 Also, start small, so if your wrapped library has a function like say `print_version`, just do enough to make sure that you can get that working in Python first.
+
+Do this using `verify` above.
 
 Subsequently it just becomes adding more functions and types! :-)
 
@@ -224,10 +252,28 @@ Subsequently it just becomes adding more functions and types! :-)
 This is essentially about how the bindings will work on a computer other than the one where they were developed. :-)
 
 1. Use `src` and `lib` as separate directories (so this is consistent with mental model of C src/lib)
-2. Use the `wrapper_builder` as defined above in your `setup.py`
+2. `src` are packaged as `sdist`.
+3. Use the `wrapper_builder` as defined above in your `setup.py`
 
 `cffi` defines additional params to `setup` function called `cffi_modules`. The `wrapper_builder` module discussed above is included here.
 
+
+--
+```python
+
+# Stuff in your `setup.py`
+
+setup(name='Awesome Library Binding',
+				...
+        setup_requires=['cffi>=1.14.0'],
+        install_requires=['cffi>=1.14.0'],
+        cffi_modules=[
+            epan_ffi_module,
+            libpcap_ffi_module
+            ],
+        packages=find_packages(),
+				...
+```
 
 ---
 ### Runtime stage
@@ -240,23 +286,32 @@ Often that user is you! :-) (Perhaps only you!)
 
 ### Providing your own API
 
-1. Generally when you wrap a library, you'll typically want to provide your own API and not simply wrap the 'C' API.
+1. You should make your own API that wraps the library underneath.
 
-2. But also make that available to someone who just wants that! :-)
+--
+
+2. But also make original API available to someone who just wants that! :-)
+
+--
 
 3. Your API should 'think in Python' and not 'think in wrapped library'. (Often the wrapped library's API can be terrible and you want to hide the ugly parts from your users! :-) ).
 
-4. For users of your library, often wrapped library is just a detail they don't even have to worry about (as long as `pip install your_awesome_wrapper` works)
+--
+
+4. For users of your library, often wrapped library is just a detail.
+
+Notes:
+They don't even have to worry about (as long as `pip install your_awesome_wrapper` works)
 
 --
 Example:
 
 1. `wishpy` wraps `libpcap` and `wireshark` C libraries in Python.
 2. While the bindings are available as it is - if a user chooses,
-3. We define our own API
+3. We define our own API - Which are more Pythonic
    * `Capturer` - for capturing live packets from network device
    * `Dissector` - for dissecting packets
-4. Users need to know only about the APIs we provide.
+4. Users should generally need to know only about the APIs we provide.
 
 --
 ### Supporting multiple versions of library
@@ -274,22 +329,102 @@ Here the separation above into `src` and `lib` becomes quite handy -
 Generally -
 
 1. define `api.py` (or a more descriptive module name) for your APIs.
-2. and `_wrapper.py` for the wrapped library and details of managing multiple versions of bindings etc. are handled here.
+2. and `_wrapper.py` for the wrapped library and details of managing multiple versions of library etc. are handled here.
 3. One advantage is - tomorrow if a better library comes and you already have enough users, you can still replace the underlying 'wrapped' libraries.
 
 ---
 ### Not So FAQs (WIP)
 
 - Keeping in mind about the GC and making sure your objects remain in scope (`cffi` has a pretty good documentation about it.)
-- Copying Data to/from C types.
+--
+Example:
+
+```python
+
+def my_func():
+	val = ffi.new('char *')
+	# do stuff..
+
+class C:
+	...
+
+	def call_my_func(self):
+		self._val = ffi.new('char *')
+		my_func(self._val)
+	...
+```
+--
+- Copying Data to/from C types. `ffi.memmove`
+
+--
+
+- All 'C' calls are made by releasing GIL (As some calls can potentially block!)
+
+--
+```c
+
+// Generated code looks like - (Taken from `wishpy`)
+
+...
+  Py_BEGIN_ALLOW_THREADS
+  _cffi_restore_errno();
+  { result = pcap_tstamp_type_name_to_val(x0); }
+  _cffi_save_errno();
+  Py_END_ALLOW_THREADS
+...
+```
+--
+
+- Callbacks
+
+  * Possible to use Python functions as callbacks.
+	* `cffi` documentation is pretty good about this.
+--
+
+- For calls in Fast Paths, dereference at the class / object
+
+--
+```Python
+
+class C:
+
+	def fast_path(..):
+		wrapped_lib.freq_called_func(...)
+
+```
+--
+Better to
+
+```Python
+
+class C:
+
+	wrapped_lib_freq_called_func = wrapped_lib.freq_called_func
+
+	def fast_path(..):
+		cls.wrapped_lib_freq_called_func(...)
+```
+
+--
+But always **profile first!** - before optimizations like this.
+
+---
+
+A Word about performance:
+
+1. The specific problem is really a sweet spot for `PyPy`.
+2. Something that needs to run fast but does not involve `numpy` arrays.
+3. I have seen performance - **5 times** faster than `CPython`.
+4. In fact we'll see - for this particular run, this beats `tshark` written in C.
 
 ---
 ### Demo (optional)
 
 Now we'll look at a quick demo of something that works. A simple example -
 
-- We pick packets off an interface, parse them and push them to Redis. (You can push them to Kafka or Elastic or Anything.)
+- Performance demo with `PyPy`
 
+- We pick packets off an interface, parse them and push them to Redis. (You can push them to Kafka or Elastic or MongoDB if you like.)
 
 ---
 </script>
