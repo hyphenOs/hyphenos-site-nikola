@@ -101,6 +101,10 @@ code {
     color: #296129;
 }
 
+.blog-content  h2, h3 {
+	color: #292961;
+}
+
 .utterances {
     max-width: 100%;
 }
