@@ -80,7 +80,7 @@ Elastic's - PacketBeat?
 What you really need is - Wireshark's Dissectors in Python World.
 
 ---
-### Choices for writing Python Bindings (WIP)
+### Choices for writing Python Bindings
 
 1. Ctypes
 --
@@ -95,7 +95,7 @@ From [`cffi` Goals](https://cffi.readthedocs.io/en/latest/goals.html)
 
 > The goal is to call C code from Python without learning a 3rd language: existing alternatives require users to learn domain specific language (Cython, SWIG) or API (ctypes). The CFFI design requires users to know only C and Python, minimizing the extra bits of API that need to be learned.
 ---
-### `cffi` Features Overview (WIP)
+### `cffi` Features Overview
 
 ABI and API Modes - Which one to use when?
 --
@@ -360,6 +360,8 @@ class C:
 
 - All 'C' calls are made by releasing GIL (As some calls can potentially block!)
 
+- Don't muck around with APIs from `Python.h`
+
 --
 ```c
 
@@ -422,11 +424,14 @@ A Word about performance:
 
 Now we'll look at a quick demo of something that works. A simple example -
 
+- Wishpy and Elastic/Kibana
 - Performance demo with `PyPy`
-
-- We pick packets off an interface, parse them and push them to Redis. (You can push them to Kafka or Elastic or MongoDB if you like.)
-
 ---
+### Code Linkks
+
+1. `wishpy` Source - https://github.com/hyphenOs/wishpy
+2. `wishpy` Documentation - https://wishpy.readthedocs.io
+3. `wishpy` Examples - https://github.com/hyphenOs/wishpy-examples
 </script>
 </section>
 
