@@ -14,9 +14,13 @@
     <h5 class="blog-link">
       <a class="blue" href="/categories">Categories</a>
     </h5>
+    <h5 class="blog-link">
+      <a class="blue" href="/categories/snippets">Snippets</a>
+    </h5>
   </div>
 <div class="blog-list">
     {% for post in posts %}
+    {% if "Snippets" not in post.alltags %}
     <div class="blog-card">
         <header class="blog-header">
             <h2><a class="blue" href="{{ post.permalink() }}">{{ post.title() }}</a></h2>
@@ -45,6 +49,7 @@
         </article>
         {% endif %}
     </div>
+    {% endif %}
     {% endfor %}
 </div>
   <div class="blog-links blog-header blog-card">
