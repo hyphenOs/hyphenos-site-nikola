@@ -45,7 +45,6 @@
 1. hyphenOs Software Labs - Systems Software.
 2. Mostly programming in Python for fun as well as for work.
 3. Like Python for quickly trying out ideas
-4. Rust noob
 
 ---
 
@@ -55,9 +54,10 @@ Write Python bindings for your favourite C Library in an afternoon and not in a 
 ---
 ### What we'll look at
  1. A bit of background and how this got started.
- 2. Choices for writing Python bindings
- 3. Working with `cffi` - Three stages `dev`, `deploy` and `runtime`.
- 4. `cffi` Some more practical advice.
+ 2. `cffi` in Details
+  - Choices for writing Python bindings
+  - Three stages  of working with `cffi` - `dev`, `deploy` and `runtime`.
+  - `cffi` Some more practical advice.
  5. Demo (Time Permitting)
  6. Questions - Mostly offline.
 ---
@@ -79,16 +79,20 @@ Elastic's - PacketBeat?
 
 What you really need is - Wireshark's Dissectors in Python World.
 
+--
+
+What is a dissector and packet dissection?
+
+![](/blog/images/dissection.png)
+
 ---
 ### Choices for writing Python Bindings
 
 1. Ctypes
---
 2. `cffi`
---
 3. `SWIG`
---
-4. Classic Python API
+4. `Cython`
+4. Classic Python API (doing all heavy-lifting)
 --
 Why `cffi` ?
 From [`cffi` Goals](https://cffi.readthedocs.io/en/latest/goals.html)
@@ -96,15 +100,14 @@ From [`cffi` Goals](https://cffi.readthedocs.io/en/latest/goals.html)
 > The goal is to call C code from Python without learning a 3rd language: existing alternatives require users to learn domain specific language (Cython, SWIG) or API (ctypes). The CFFI design requires users to know only C and Python, minimizing the extra bits of API that need to be learned.
 ---
 ### `cffi` Features Overview
-
-ABI and API Modes - Which one to use when?
+- Application Binary Interface (like `ctypes.cdll`)
+- Application Programming Interface (API)
 --
-- Normally, You'll use API mode.
-
-- ABI mode is like `ctypes.cdll`
-  - This is runtime only, cannot build/distribute (well almost!).
-  - Good if you only need a couple of APIs from a library.
-
+You define something called as C definitions for Python Bindings
+--
+These include the 'types' and 'functions' from the underlying C library
+--
+Use `cffi` APIs to generate the 'source' file, that will compile into a Python module.
 ---
 ### `cffi` Practical Advice
 
@@ -211,7 +214,7 @@ Next step is to `verify` or `set_source` to compile.
 *ie* the `cdef`s build on your machine. (Note: requires dev tools.)
 
 --
-1. Use `verify` to quickly try out stuff, but `set_source` when building, distributing.
+1. Use `verify` to quickly try out stuff (in fact it may be depricated), but `set_source` when building, distributing.
 2. Typically, have a separate `wrapper_builder` module that you use in your `setup.py`
 3. Also, define `__main__` where you can `verify` your FFI bindings.
 
