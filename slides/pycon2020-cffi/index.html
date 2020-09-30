@@ -43,8 +43,7 @@
 ### About Me
 
 1. hyphenOs Software Labs - Systems Software.
-2. Mostly programming in Python for fun as well as for work.
-3. Like Python for quickly trying out ideas
+2. Program in Python for Work as well as Fun
 
 ---
 
@@ -94,10 +93,18 @@ What is a dissector and packet dissection?
 4. `Cython`
 4. Classic Python API (doing all heavy-lifting)
 --
+What is `cffi`?
+
+C Foreign Functions Interface
+--
 Why `cffi` ?
 From [`cffi` Goals](https://cffi.readthedocs.io/en/latest/goals.html)
 
 > The goal is to call C code from Python without learning a 3rd language: existing alternatives require users to learn domain specific language (Cython, SWIG) or API (ctypes). The CFFI design requires users to know only C and Python, minimizing the extra bits of API that need to be learned.
+--
+A Disclaimer:
+
+We'll be seeing a lot of examples/code from `wishpy`!
 ---
 ### `cffi` Features Overview
 - Application Binary Interface (like `ctypes.cdll`)
@@ -264,9 +271,9 @@ This is essentially about how the bindings will work on a computer other than th
 --
 ```python
 
-# Stuff in your `setup.py`
+# Stuff in your `setup.py` (From `wishpy/setup.py`)
 
-setup(name='Awesome Library Binding',
+setup(name='wishpy',
 				...
         setup_requires=['cffi>=1.14.0'],
         install_requires=['cffi>=1.14.0'],
