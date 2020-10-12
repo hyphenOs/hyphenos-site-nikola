@@ -44,10 +44,10 @@
 
 1. hyphenOs Software Labs - Systems Software.
 2. Program in Python for Work as well as Fun
-
-Contact:
-1. email: gabhijit@iitbombay.org
-2. github: https://github.com/gabhijit
+3. Contact
+   * email: gabhijit@iitbombay.org
+   * github: https://github.com/gabhijit
+   * slides: https://hyphenos.io/slides/pycon2020-cffi/
 
 ---
 
@@ -214,7 +214,9 @@ Advantage:
 3. For really big libraries - easy to re-organize the `cdef` as above.
 
 --
-`cffi` provides two APIs to 'compile' - `verify` / `set_source`
+`cffi` provides two APIs to 'compile'
+  - `verify`
+  - `set_source`
 
 Both do similar jobs -
 
@@ -235,6 +237,26 @@ Next step is to `verify` or `set_source` to compile.
 
 --
 Example:
+```python
+# part of code from wishpy/libpcap/src/pcap.py
+
+# Following FFI object will be used later in `setup.py`
+libpcap_ffi = FFI()
+
+libpcap_ffi.cdef(libc_typedefs_h_cdef)
+.. # more `cdef`s
+
+_pkg_name = 'wishpy.libpcap.lib.libpcap_ext'
+_pkgconfig_libs = ['libpcap']
+
+_sources = '''
+    #include <pcap/pcap.h>
+    '''
+
+libpcap_ffi.set_source_pkgconfig(_pkg_name, _pkgconfig_libs, _sources)
+
+```
+--
 
 ```python
 # Code from wishpy/libpcap/src/pcap_builder.py
@@ -250,8 +272,9 @@ if __name__ == '__main__':
 
     print(libpcap_lib)
 
-		# You can use library's API now as say -
-		libpcap_lib.pcap_open(...)
+    # You can use library's API now as say -
+    libpcap_lib.pcap_open(...)
+
 ```
 --
 So if this works, we are ready for next stage - 'build/distribution' -
@@ -280,6 +303,9 @@ This is essentially about how the bindings will work on a computer other than th
 ```python
 
 # Stuff in your `setup.py` (From `wishpy/setup.py`)
+
+epan_ffi_module = 'wishpy/wireshark/src/wireshark3/epan/epan_builder.py:epan_ffi'
+libpcap_ffi_module = 'wishpy/libpcap/src/pcap_builder.py:libpcap_ffi'
 
 setup(name='wishpy',
 				...
@@ -433,9 +459,8 @@ But always **profile first!** - before optimizations like this.
 A Word about performance:
 
 1. The specific problem is really a sweet spot for `PyPy`.
-2. Something that needs to run fast but does not involve `numpy` arrays.
-3. I have seen performance - **5 times** faster than `CPython`.
-4. In fact we'll see - for this particular run, this beats `tshark` written in C.
+2. I have seen performance - **5 times** faster than `CPython`.
+3. In fact we'll see - for this particular run, this beats `tshark` written in C.
 
 ---
 ### Demo (optional)
