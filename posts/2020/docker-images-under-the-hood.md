@@ -1,12 +1,12 @@
 .. title: Docker Images Under the Hood
 .. slug: docker-images-under-the-hood
-.. date: 2020-12-01 10:07:00 UTC+05:30
+.. date: 2020-12-03 10:07:00 UTC+05:30
 .. tags: Docker, Containers
 .. author: Abhijit Gadgil
 .. link:
 .. description:
 .. type:
-.. status: draft
+.. status:
 .. summary: This post looks at the details of the docker images and how docker engine interfaces with docker registry to download the images.
 
 # Introduction
