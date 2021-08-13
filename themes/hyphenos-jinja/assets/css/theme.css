@@ -101,6 +101,15 @@ code {
     color: #296129;
 }
 
+code {
+	font-weight: bold;
+}
+
+article.blog-content > div > p > code {
+	font-weight: bold;
+	font-size: 105%;
+}
+
 .blog-content  h2, h3 {
 	color: #292961;
 }

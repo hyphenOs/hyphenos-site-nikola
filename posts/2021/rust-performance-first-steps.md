@@ -1,6 +1,6 @@
 .. title: Rust Performance Measurement Initial Steps
 .. slug: rust-performance-measurement-initial-steps
-.. date: 2021-08-09 16:43:00 UTC+05:30
+.. date: 2021-08-13 10:23:00 UTC+05:30
 .. tags: Rust, Performance, FlameGraphs
 .. author: Abhijit Gadgil
 .. link:
@@ -11,13 +11,15 @@
 
 # Introduction
 
-While working on [`wishpy`](https://pypi.org/project/wishpy/){:target="\_blank"} one of the things that I realized was, [`Wireshark`](https://www.wireshark.org/){:target="\_blank"} is primarily meant to be used as a tool. While, Wireshark provides programmatic API (C based), they are not very convenient to use. One of the Rust project ideas that I had was - to develop a packet dissection framework, that is API friendly. There is a Go based [`gopacket`](https://github.com/google/gopacket/){:target="\_blank"} which comes quite close to what I had in mind. I had a rough idea of how to get it working in Rust and I started upon implementing it in a crate called [`scalpel`](https://github.com/gabhijit/scalpel){:target="\_blank"}. It's still a work in progress and this blog post is not about it _per se_. Since this particular code is going to be sitting at a very low level in a Packet Analysis stack, the actual dissection should be really fast. My goal to start with was to be at-least at par, if not better with `gopacket`'s performance without any optimizations. For a couple of basic dissectors like `IPv4` and `IPv6`, it was doing actually substantially better - nearly twice as fast compared to `gopacket`, and this looked quite promising, but for one particular benchmark for a DNS Packet, the performance more than twice slower than the `gopacket`'s. The actual reason for this ended up being something else and not just the dissection performance, but identifying the root cause helped in better understanding at-least some parts of Rust's ecosystem for running benchmarks and instrumentation of running code. Next, we'll look at some of those tools and also how these tools helped identify and reason about the performance issues and what steps were taken to solve the issue.
+While working on [`wishpy`](https://pypi.org/project/wishpy/){:target="\_blank"} one of the things that I realized was, [`Wireshark`](https://www.wireshark.org/){:target="\_blank"} is primarily meant to be used as a tool. While, Wireshark provides programmatic API (C based), they are not very convenient to use. One of the Rust project ideas that I had was - to develop a packet dissection framework, that is API friendly. There is a Go based [`gopacket`](https://github.com/google/gopacket/){:target="\_blank"} which comes quite close to what I had in mind. I had a rough idea of how to get it working in Rust and I started upon implementing it in a crate called [`scalpel`](https://github.com/gabhijit/scalpel){:target="\_blank"}. It's still a work in progress and this blog post is not about it _per se_.
+
+Since this code is targeted for working at a very low level in a Packet Analytics stack, the actual dissection should be really fast. My goal to start with was to be at-least at par, if not better with `gopacket`'s performance (since we are developing it in a non-GC language) without any optimizations. For a couple of basic dissectors like `IPv4` and `IPv6`, it was doing actually substantially better - nearly twice as fast compared to `gopacket`, and this looked quite promising, but for one particular benchmark for a DNS Packet, the performance was more than twice slower than the `gopacket`'s. The actual reason for this ended up being something else and not just the dissection performance, but identifying the root cause helped in better understanding at-least some parts of Rust's ecosystem for running benchmarks and instrumentation of running code. Next, we'll look at some of those tools and also how these tools helped identify and reason about the performance issues and what steps were taken to solve the issue.
 
 # Background
 
 Before we get into the details of the actual changes and the eventual improvements, a quick look at the ecosystem. There is a cargo command called `cargo bench` that can be used to run benchmark programs. [`criterion`](https://bheisler.github.io/criterion.rs/book/index.html){:target="\_blank"} is a micro-benchmarking tool that can be used with `cargo bench`. The documentation of `criterion` is quite good and we will not look into the details of how that is to be used. We need to add it as one of the `dev-dependencies` and add modules inside the `benches` directory of your crate and then `cargo bench` will take over.
 
-While `cargo bench` is useful for running benchmarks, to be able to look underneath, we need additional instrumentation mechanism. Brendan Greg's [Flamegraphs](https://www.brendangregg.com/flamegraphs.html){:target="\_blank"} is an excellent tool for this. It can be used to generate a nice SVG which shows the frequently used code paths along with their call stacks. This can show which parts of the program are spending more time. There is a [Rust port of FlameGraph](https://github.com/jonhoo/inferno){:target="\_blank"}, which is integrated with cargo toolchain and one can run a command called `cargo flamegraph`, that generates the flame graph for running a particular benchmark.
+While `cargo bench` is useful for running benchmarks, to be able to look underneath, we need additional instrumentation mechanism. Brendan Greg's [Flamegraphs](https://www.brendangregg.com/flamegraphs.html){:target="\_blank"} is an excellent tool for this. It can be used to generate a nice SVG which shows the frequently used code paths along with their call stacks. This can for example show which parts of the program the CPU is spending spending more time. There is a [Rust port of FlameGraph](https://github.com/jonhoo/inferno){:target="\_blank"}, which is integrated with cargo toolchain and one can run a command called `cargo flamegraph`, that generates the flame graph for running a particular benchmark.
 
 So the plan was to generate FlameGraph for the benchmark that was performing poorly and identifying the issues and see how they can be addressed if at all. Also, the idea was not to actually perform any 'hand optimizations', but to simply avoid parts that were poorly implemented (like too many allocations for example) and see if they can be improved and how much.
 
@@ -25,7 +27,7 @@ So the plan was to generate FlameGraph for the benchmark that was performing poo
 
 The code that we are exploring is for the dissection of DNS packets, before we actually look into the code, let's quickly understand a bit about how records are compressed in the DNS packets as this particular part of the code was problematic.
 
-In a DNS packet, DNS records for the hostnames are compressed by not repeating the parts of the hostname again if multiple records are present and simply providing the pointer to the actual records, for instance let's say there are four name server records for `ns1.example.com`, `ns2.example.com`, `ns3.example.com` and `ns4.example.com`, this is encoded in a packet as `ns1.example.com` and for `ns2`, `ns3` and `ns4` only the pointer to the `.example.com` is kept. [This section](https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.4){:target="\_blank"} in the DNS RFC has more details about it.
+In a DNS packet, DNS records for the hostnames are compressed by not repeating the parts of the hostname again if multiple records are present and simply providing the pointer to the actual records, for instance let's say there are four name server records for `ns1.example.com`, `ns2.example.com`, `ns3.example.com` and `ns4.example.com`, this is encoded in a packet as `ns1.example.com` and for `ns2`, `ns3` and `ns4` only the pointer to the `.example.com` is kept. [This section](https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.4){:target="\_blank"} in the RFC-1035 has more details about it.
 
 
 # First Implementation and Issues
@@ -55,11 +57,12 @@ We are going to look at a specific function that is obtaining the DNS names from
 ```
 The actual code for this [implementation can be found here](https://github.com/gabhijit/scalpel/blob/07fde032f10b617eae9feaddc2eb0a61ea54b530/src/layers/dns.rs#L90){:target="\_blank"}.
 
-So what the code was essentially doing was recursively calling the `labels_from_offset`, where each call to `labels_from_offset` was returning a `Vec<u8>` and finally all the vectors were flattened into a `Vec<u8>`.
+So what the code was essentially doing was recursively calling the `labels_from_offset`, where each call to `labels_from_offset` was returning a `Vec<u8>` and finally all the vectors were flattened into a `Vec<u8>`. Records will be generated using this `Vec<u8>`, which is often just getting the `String` from that vector.
 
 
-This part looked like the culprit and indeed the FlameGraph did indicate that a chunk of time was being spent here. See below -
+This part looked like the culprit and indeed the FlameGraph did indicate that a chunk of time was being spent here (Open the SVG and size of the rectangle for `<alloc::vec::Vec<T>..` vs `...::dns_name_from_u8::labels_from_offset`). See below -
 
+<br/>[open flamegraph in new tab](/blog/images/flamegraph_1.svg?x=18073&y=421){:target="\blank"}
 
 ![FlameGraph 1 - FlameGraph for `Vec<Vec<u8>>`](/blog/images/flamegraph_1.png "FlameGraph 1")
 
@@ -81,7 +84,7 @@ To improve the performance, the recursive call to the `labels_from_offset` path 
 
 # Iteration 2 - Flattening the Vector
 
-This `Vec<Vec<u8>>` can be avoided by using a 'flattened' vector and thus avoiding the flattening cost. This iteration was tried next. This helped improve the performance quite a bit, nearly twice for the worst performing case and by about 20-30 percent in other cases. This was understandable because in the other cases there were not as many compressions and hence that part of the code was not getting hit often. Also, instead of allocating a `Vec` with no capacity and growing it, some `capacity` was reserved, which helped as well.
+This `Vec<Vec<u8>>` can be avoided by using a 'flattened' vector and thus avoiding the flattening cost. This iteration was tried next. This helped improve the performance quite a bit, nearly twice for the worst performing case and by about 20-30 percent in other cases. This was understandable because in the other cases there were not as many compressions and hence that part of the code was not getting hit often. Also, instead of allocating a `Vec` with no capacity and growing it, some `capacity` was reserved, nearly a fourth of performance improvement was due to 'reserve'ing the vector.
 
 The actual code for this [implementation can be found here](https://github.com/gabhijit/scalpel/blob/891355f8ec7de38c778e11fbdfdfb328927a2237/src/layers/dns.rs#L90){:target="\_blank"}.
 
@@ -96,7 +99,8 @@ Summary results after running `cargo bench` after the above changes. As can be s
 | Parse_DNS_Regression_Packet | 462.30 ns |
 
 <br/>
-Also, as can be seen in the flamegraph below - Most of the time spent in Vector Alloc is gone now.
+Also, as can be seen in the flamegraph below - the time spent in Vector allocation is reduced, considerably (this can be observed in the SVG by comparing the relative size of the rectangles for `<alloc::vec::Vec<T>...>` and `...::dns_name_from_u8::labels_from_offset`.
+<br/>[open flamegraph in new tab](/blog/images/flamegraph_2.svg?x=17958&y=405){:target="\blank"}
 
 ![FlameGraph 2 - FlameGraph for `Vec<u8>`](/blog/images/flamegraph_2.png "FlameGraph 2")
 
@@ -115,10 +119,10 @@ The actual code for this [implementation can be found here](https://github.com/g
 | Parse_DNS_Regression_Packet | 450.01 ns |
 
 <br/>
-As can be seen from the FlameGraph, there is no visible difference in the FlameGraph between this case and the previous case.
+As can be seen from the FlameGraph, relative time spent in Vector allocation (size of the rectangle in the SVG ) is even smaller in this case.
+<br/>[open flamegraph in new tab](/blog/images/flamegraph_3.svg?x=20183&y=869){:target="\blank"}
 
 ![FlameGraph 3 - FlameGraph for `Vec<u8>`](/blog/images/flamegraph_3.png "FlameGraph 3")
-
 # Key Takeaways
 
 Key takeaways from these iterations can be summarized as follows -
@@ -129,20 +133,22 @@ Key takeaways from these iterations can be summarized as follows -
 
 # Postscript
 
-Even after these 'optimizations' (they should rather be called - improvements than optimizations), the code finally was not doing just as well as the `gopacket` code, which still didn't make a whole lot of sense as most other benchmarks were running substantially better. It turned out, that the `gopacket` benchmark was reusing an allocated slice and hence appeared to run faster. When the same benchmark in `gopacket` was changed to run like the benchmark above, the results were consistent, the benchmark running substantially faster. The below table shows the comparison for benchmarks between `gopacket` implementation and `scalpel` implementation. While it might look like `scalpel` is doing twice better than `gopacket` for these benchmarks, I would not jump to the conclusion and shout this is twice as fast, but surely it's promising enough (in fact more than promising enough) to be pursued further.
+Even after these 'optimizations' (they should rather be called - improvements than optimizations), the code finally was not doing just as well as the `gopacket` code, which still didn't make a whole lot of sense as most other benchmarks were running substantially better. It turned out, that the `gopacket` benchmark was reusing an allocated slice and hence appeared to run faster. When the same benchmark in `gopacket` was changed to run like the benchmark above, the results were consistent, the benchmark running substantially faster in `scalpel`. The below table shows the comparison for benchmarks between `gopacket` implementation and `scalpel` implementation. While it might look like `scalpel` is doing twice better than `gopacket` for these benchmarks, I would not jump to the conclusion and shout this is twice as fast, but surely it's promising enough (in fact more than promising enough) to be pursued further.
 
 
 | Benchmark | `gopacket`\*| `gopacket`+ | `scalpel` |
 |:--|:--:|:--:|:--:|
 | Parse_DNS_AAAA | 4566.2 ns | 644.3 ns | 919.64 ns {{% emoji white_heavy_checkmark %}}|
-| Parse_DNS | 867.8 ns | N/A | 384.97 ns {{% emoji white_heavy_checkmark %}}|
-| Parse_DNS_Regression_Packet | 1094 ns | N/A | 450.01 ns {{% emoji white_heavy_checkmark %}}|
+| Parse_DNS | N/A | 867.8 ns | 384.97 ns {{% emoji white_heavy_checkmark %}}|
+| Parse_DNS_Regression_Packet | N/A | 1094 ns | 450.01 ns {{% emoji white_heavy_checkmark %}}|
 
 \* - `gopacket` benchmark modified for comparison with `scalpel`.
 <br/>
 \+ - The actual `gopacket` benchmark (reusing the allocated slice).
 
-# Scalpel Looking for Contributions
+For the `gopacket` benchmarks, look at the [`dns_test.go`](https://github.com/google/gopacket/blob/3eaba08943250fd212520e5cff00ed808b8fc60a/layers/dns_test.go#L68){:target="\blank"} and [`udp_test.go`](https://github.com/google/gopacket/blob/3eaba08943250fd212520e5cff00ed808b8fc60a/layers/udp_test.go#L352){:target="\blank"} files.
+
+# Contributions Welcome
 
 Scalpel is looking for help from people to contribute to write dissectors for more protocols. Please check the scalpel project on Github.
 
