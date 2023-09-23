@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="date" content="2019-06-17">
+    <meta name="date" content="2023-09-22">
 
-    <title>Python and cffi - Visualizing Network Traces</title>
+    <title>Speeding up Python with Rust</title>
 
     <link rel="stylesheet" href="/slides/css/reset.css">
     <link rel="stylesheet" href="/slides/css/reveal.css">
@@ -45,12 +45,428 @@
 ### About Me
 
 1. hyphenOs Software Labs - Systems Software.
-2. Program in Python for Work as well as Fun
-3. Contact
-   * email: gabhijit@iitbombay.org
-   * github: https://github.com/gabhijit
-   * slides: https://hyphenos.io/slides/pycon2023-python-rust/
+2. Long time Pythonista and recently Rust for the last couple of years.
 
 ---
 
-### Coming Soon
+### Overview of the talk
+
+1. Motivation for the implementation. (3 mins)
+2. Internet routing, BGP and making sense of BGP data.
+3. Internet Routing - IP Lookup Problem and Implementation (Python)
+4. Rust with Python Bindings (`pyo3`) - Overview and Quick-start
+5. Performance comparison
+
+---
+
+How far the server is from the user?
+
+--
+
+Map IP Address of the Server to it's Geo-location. Essentially a Geo-IP Lookup problem.
+
+--
+
+Can Python come to help here?
+
+--
+
+Turns out yes, using BGP and other public domain data we can indeed solve this problem using Python.
+
+---
+
+### Internet routing - Autonomous Systems
+![Autonomous Systems](/slides/pycon2023-python-rust/autonomous-systems.drawio.png "Autonomous Systems")
+
+--
+
+Each Autonomous System maps to a Prefix (eg. AS 20000 Maps to a prefix '23.1.24.0/24' in the example above.)
+
+--
+
+## Public Datasets
+
+1. Routeviews (https://routeviews.org/bgpdata/) for BGP RIB Updates
+2. Caida (https://publicdata.caida.org/datasets/) for Autonomous Systems Data
+
+--
+
+## Overview of the solution
+
+1. Using publicly available datasets, build a routing table.
+2. Perform lookup in the routing table
+3. Map Autonomous Systems to Organization and thus to country
+4. IP Lookup &rarr; Autonomous System &arr; Organization &rarr; Country
+
+---
+
+BGP Routing Updates data is available as Multi-Threaded Router Toolkit file-format as defined in RFC6396.
+
+We are interested in IPV4 Unicast types Routing Information Base Entries. (`RIBEntry`)
+
+--
+## Parsing MRT Format Files.
+
+```python [1-4|5-8|9-31|32-]
+class MRTDumper(object):
+    '''A Class wrapping an MRT Data File. This implements an iterator
+		over the RIB Entries found in the MRT Data file. Works with Gzip
+		and BZ2 encoded files.'''
+
+		...
+```
+--
+
+## Example Parsed RIB Entry
+
+![RIB Entry](/slides/pycon2023-python-rust/rib-prefix-entry.png "RIB Entry")
+
+---
+
+## IP Lookup Problem: IP Address to Destination
+
+1. Why not simply a hashtable?
+2. Longest Prefix Match - Tries
+3. Radix Lookup - a simple table based approach..
+
+--
+
+## Route Table data structure
+
+Start with a 'Level 0' Lookup Table of 64K Entries.
+Numerical value of first 2 octets as index in the table.
+
+![Level 0 Table](/slides/pycon2023-python-rust/level0-empty.drawio.png "Level 0 Table")
+
+--
+
+`Table.add('192.168.0.0/16', 'AS 100')`
+
+
+![Route 192.168.0.0/16](/slides/pycon2023-python-rust/level0-1-entry.drawio.png "Route 192.168.0.0/16")
+
+--
+
+`Table.add('192.168.1.0/24', 'AS 200')`
+
+
+![Route 192.168.1.0/24](/slides/pycon2023-python-rust/level0-1-2-entry.drawio.png "Route 192.168.1.0/24")
+
+--
+`Table.add('192.168.1.16/28', 'AS 300')`
+
+
+![Route 192.168.1.16/28](/slides/pycon2023-python-rust/level0-2-3-entry.drawio.png "Route 192.168.1.16/28")
+
+--
+
+## Routing Table Lookup
+
+| IP Address | Destination AS |
+|-------|-------|
+|192.168.1.17 | AS 300 |
+|192.168.1.7 | AS 200|
+|192.168.0.17 | AS 100|
+|192.165.100.1 | None |
+
+---
+
+## Using `numpy.dtype` for Routing Table.
+---
+
+## Speeding up table lookup
+
+* Compute sensitive problem (nearly no I/O except when we read routing updates).
+* Should benefit from 'native' implementation. Choices, implement in `C` or `Rust`.
+
+--
+
+## Rust advantages
+1. Memory Safety
+2. No Data Races
+3. Lot of higher level data structures, don't need to do heavy lifting ourselves. (Like `Vec`, `HashMap`, `BTreeSet`)
+
+---
+
+## Rust and Python: The Ecosystem
+
+1. `pyo3` - For developing Python extension modules in Rust.
+2. `maturin` - Binary for building/publishing rust crates as Python packages.
+
+Note: This is enough to get started, `pyo3` documentation covers several other details.
+---
+
+## Getting Started: A very basic workflow
+
+```shell
+# This installs maturin a tool required for building/distributing python extensions in Rust.
+$ pip install maturin
+
+# This creates a new rust `crate`
+$ maturin init cpy-rust
+
+```
+--
+
+##  Generated `Cargo.toml`
+
+```toml
+[package]
+name = "cpy-rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "cpy_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.19.0"
+```
+
+--
+
+## Generated `pyproject.toml`
+
+```toml
+[build-system]
+requires = ["maturin>=1.2,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "cpy-rust"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+
+[tool.maturin]
+
+```
+--
+## Building the skeleton rust crate and python module
+
+```shell
+# Maturin requires virtual env to be created. So we first create that
+$ python -m venv venv3
+$ . venv3/bin/activate
+
+# Run `maturin develop` to build and install locally in the virtual env.
+$ maturin develop
+```
+
+This installs the built extension module in the virtualenv.
+
+---
+
+## Rust Structures inside Python.
+
+We will look at the Routing Table implementation in Rust and how Python bindings are generated.
+--
+
+```rust
+
+use pyo3::prelude::*;
+
+#[pyclass]
+#[derive(Debug, Default, Clone)]
+struct RouteEntry {
+    children: Option<RouteEntryTable>,
+    index: usize,
+    output_index: u32,
+    prefix_length: u8,
+    r#final: bool,
+}
+
+#[pyclass]
+#[derive(Default, Clone)]
+struct RouteEntryTable(Vec<RouteEntry>);
+```
+--
+## Route Table Implementation with Python Bindings
+
+```rust
+
+#[pyclass]
+#[derive(Debug, Default)]
+pub struct RouteTable {
+    level0_table: RouteEntryTable,
+    route_entries_allocated: u32,
+}
+
+struct TableSize(u32, u8);
+
+#[pymethods]
+impl RouteTable {
+	...
+}
+
+```
+--
+
+```rust
+
+#[pymethods]
+impl RouteTable {
+    ...
+
+    #[new]
+    pub fn new() -> Self {
+        let entries = vec![RouteEntry::default(); 65536];
+        let level0_table = RouteEntryTable(entries);
+        let route_entries_allocated = 65536;
+
+        Self {
+            level0_table,
+            route_entries_allocated,
+        }
+    }
+	...
+
+```
+--
+## RouteTable API methods
+
+```rust
+
+#[pymethods]
+impl RouteTable {
+    ...
+    pub fn lookup(&self, ip_address: &str) -> Option<u32> {
+			...
+    }
+
+    pub fn add(&mut self, prefix: &str, length: u8, destination_idx: u32) {
+			...
+    }
+
+    pub fn delete(&mut self, prefix: &str, length: u8) {
+			...
+    }
+
+		...
+}
+
+```
+--
+## RouteTable API methods - Static Methods in Python Class.
+
+```rust
+
+#[pymethods]
+impl RouteTable {
+    ...
+    #[staticmethod]
+    fn delete_from_table( table: &mut RouteEntryTable, octets: [u8; 4],
+        length: u8, level: usize,) -> u32 {
+			...
+    }
+
+    #[staticmethod]
+    fn add_in_table(
+        table: &mut RouteEntryTable, prefix_octets: [u8; 4], length: u8,
+        destination_idx: u32, level: usize,) -> u32 {
+			...
+    }
+
+		...
+```
+--
+
+## Python Module and Module API
+
+```rust
+
+#[pymodule]
+fn route_table(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<RouteEntry>()?;
+    m.add_class::<RouteEntryTable>()?;
+    m.add_class::<RouteTable>()?;
+    Ok(())
+}
+
+```
+
+--
+
+## Python API Usage
+
+```shell
+$ python
+Python 3.8.7 (default, Jun 26 2023, 10:05:27)
+[GCC 11.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import route_table
+>>> dir(route_table)
+['RouteEntry', 'RouteEntryTable', 'RouteTable', '__all__',
+'__builtins__', '__cached__', '__doc__', '__file__', '__loader__',
+'__name__', '__package__', '__path__', '__spec__', 'route_table']
+>>>
+
+```
+
+---
+
+## Performance Comparison
+
+We will compare performance between two approaches for:
+
+1. Time taken to add entries to routing table
+2. Time taken for lookup in the routing table.
+
+--
+
+## Route Table Insertion Performance
+
+Rust approach is about 70% faster than the Python approach (3.5 mins vs. 2 mins)
+
+--
+
+## Route Table Lookup Perforamnce
+
+Rust approach is about 450% (about 4.5 times faster than the Python approach (5ms vs 1ms for 1000 IP address lookups)
+
+--
+
+## Discussion about Performance
+
+1. Route table insertion performance is not Pure CPU bound performance.
+2. API available from third party trait is not exactly identical to the Python implementation API.
+3. Also note this performance comparison is with `numpy.dtype` route table implementation (which is already an optimization).
+
+---
+
+# Thanks!
+
+1. Email: gabhijit@iitbombay.org
+2. Github: https://github.com/gabhijit
+3. LinkedIn: https://linkedin.com/in/gabhijit
+3. Slides: https://hyphenos.io/slides/pycon2023-python-rust/
+
+</script>
+</section>
+
+      </div>
+    </div>
+
+    <script src="/slides/js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '/slides/plugin/markdown/marked.js' },
+          { src: '/slides/plugin/markdown/markdown.js' },
+          { src: '/slides/plugin/notes/notes.js', async: true },
+          { src: '/slides/plugin/highlight/highlight.js', async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>
