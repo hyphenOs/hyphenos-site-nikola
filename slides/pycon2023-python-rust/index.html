@@ -41,14 +41,6 @@
 	 data-separator-notes="^Notes:">
 
 	<script type="text/template">
-
-### About Me
-
-1. hyphenOs Software Labs - Systems Software.
-2. Long time Pythonista and recently Rust for the last couple of years.
-
----
-
 ### Overview of the talk
 
 1. Motivation for the implementation.
@@ -56,6 +48,13 @@
 3. Internet Routing - IP Lookup Problem and Implementation (Python)
 4. Rust with Python Bindings (`pyo3`) - Overview and implementation.
 5. Performance comparison
+
+---
+### About Me
+
+1. hyphenOs Software Labs - Systems Software.
+2. Long time Pythonista and recently a Rustacean for the last couple of years.
+3. Building Telecom infrastructure using modern safe programming languages.
 
 ---
 
@@ -80,7 +79,7 @@ Turns out yes, using BGP and other public domain data we can indeed solve this p
 
 --
 
-Each Autonomous System maps to a Prefix (eg. AS 20000 ie. 'F' Maps to a prefix '23.1.24.0/24' in the example above.)
+Each Autonomous System maps to a Prefix (eg. AS 20000 ie. 'E' Maps to a prefix '23.1.24.0/24' in the example above.)
 
 --
 
@@ -108,11 +107,35 @@ We are interested in IPV4 Unicast types Routing Information Base Entries. (`RIBE
 ## Parsing MRT Format Files.
 
 ```python [1-4|5-8|9-31|32-]
-class MRTDumper(object):
+class MRTDumper:
     '''A Class wrapping an MRT Data File. This implements an iterator
 		over the RIB Entries found in the MRT Data file. Works with Gzip
 		and BZ2 encoded files.'''
 
+		...
+```
+--
+
+```python
+
+class MRTDumper:
+	...
+	# MRTHeader = namedtuple('MRTHeader', ['ts', 'type', 'subtype', 'length'])
+	# MRT_HEADER_LENGTH = 12
+	# _MRT_HDR_PACKSTR = '>IHHI'
+	def __next__(self):
+        if not self._file_reader:
+            raise StopIteration
+        f = self._file_reader
+        try:
+            x = f.read(MRT_HEADER_LENGTH)
+            m = MRTHeader(*struct.unpack(_MRT_HDR_PACKSTR, x))
+        except:
+            raise StopIteration
+
+        e = f.read(m.length)
+        entry = read_mrt_entry(m, e, self)
+        return entry
 		...
 ```
 --
@@ -183,9 +206,10 @@ Numerical value of first 2 octets as index in the table.
 |192.168.0.17 | AS 100|
 |192.165.100.1 | None |
 
----
+--
 
-## Using `numpy.dtype` for Routing Table.
+Using `numpy.dtype` for Routing Table.
+
 ---
 
 ## Speeding up table lookup
@@ -213,7 +237,8 @@ Note: This is enough to get started, `pyo3` documentation covers several other d
 ## Getting Started: A very basic workflow
 
 ```shell
-# This installs maturin a tool required for building/distributing python extensions in Rust.
+# This installs `maturin` a tool required for building/distributing
+# python extensions in Rust.
 $ pip install maturin
 
 # This creates a new rust `crate`
@@ -262,7 +287,7 @@ classifiers = [
 
 ```
 --
-## Buildand install python module
+## Build and install python module
 
 ```shell
 # Maturin requires virtual env to be created. So we first create that
@@ -273,11 +298,11 @@ $ . venv3/bin/activate
 $ maturin develop
 ```
 
-This command builds the extension module using `cargo` tool and the built extension module is installed inside the virtualenv.
+This command builds the extension module using `cargo` tool and the built extension module is installed inside the `virtualenv`.
 
 ---
 
-## Rust Structures inside Python.
+## Using `pyo3` API: Rust `struct` to Python `class`
 
 We will look at the Routing Table implementation in Rust and how Python bindings are generated.
 --
@@ -461,7 +486,7 @@ Rust approach is about 450% (about 4.5 times faster than the Python approach (5m
 3. LinkedIn: https://linkedin.com/in/gabhijit
 3. Slides: https://hyphenos.io/slides/pycon2023-python-rust/
 4. Code:
-  - https://github.com/gabhijit/ipgiri (Pyton)
+  - https://github.com/gabhijit/ipgiri (Python)
   - https://github.com/gabhijit/rust-learning/tree/master/rust-mrtdump (Rust)
 
 </script>
