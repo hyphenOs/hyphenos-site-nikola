@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/slides/css/theme/hyphenos.css">
 
     <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="/slides/lib/css/monokai.css">
+    <link rel="stylesheet" href="/slides/hl/styles/foundation.min.css">
 
     <!-- Printing and PDF exports -->
     <script>
@@ -51,10 +51,10 @@
 
 ### Overview of the talk
 
-1. Motivation for the implementation. (3 mins)
+1. Motivation for the implementation.
 2. Internet routing, BGP and making sense of BGP data.
 3. Internet Routing - IP Lookup Problem and Implementation (Python)
-4. Rust with Python Bindings (`pyo3`) - Overview and Quick-start
+4. Rust with Python Bindings (`pyo3`) - Overview and implementation.
 5. Performance comparison
 
 ---
@@ -80,7 +80,7 @@ Turns out yes, using BGP and other public domain data we can indeed solve this p
 
 --
 
-Each Autonomous System maps to a Prefix (eg. AS 20000 Maps to a prefix '23.1.24.0/24' in the example above.)
+Each Autonomous System maps to a Prefix (eg. AS 20000 ie. 'F' Maps to a prefix '23.1.24.0/24' in the example above.)
 
 --
 
@@ -96,7 +96,7 @@ Each Autonomous System maps to a Prefix (eg. AS 20000 Maps to a prefix '23.1.24.
 1. Using publicly available datasets, build a routing table.
 2. Perform lookup in the routing table
 3. Map Autonomous Systems to Organization and thus to country
-4. IP Lookup &rarr; Autonomous System &arr; Organization &rarr; Country
+4. IP Lookup &rarr; Autonomous System &rarr; Organization &rarr; Country
 
 ---
 
@@ -119,8 +119,22 @@ class MRTDumper(object):
 
 ## Example Parsed RIB Entry
 
-![RIB Entry](/slides/pycon2023-python-rust/rib-prefix-entry.png "RIB Entry")
-
+```json
+{
+  "ORIGIN": "IGP",
+  "ASPATH": [
+    18106,
+    6939,
+    6762,
+    49666,
+    12880
+  ],
+  "NEXTHOP": "202.73.40.45",
+  "PEER_IP": "202.73.40.45",
+  "PEER_AS": 18106,
+  "PREFIX": "2.189.77.0/24"
+}
+```
 ---
 
 ## IP Lookup Problem: IP Address to Destination
@@ -248,7 +262,7 @@ classifiers = [
 
 ```
 --
-## Building the skeleton rust crate and python module
+## Buildand install python module
 
 ```shell
 # Maturin requires virtual env to be created. So we first create that
@@ -259,7 +273,7 @@ $ . venv3/bin/activate
 $ maturin develop
 ```
 
-This installs the built extension module in the virtualenv.
+This command builds the extension module using `cargo` tool and the built extension module is installed inside the virtualenv.
 
 ---
 
@@ -422,7 +436,7 @@ We will compare performance between two approaches for:
 
 ## Route Table Insertion Performance
 
-Rust approach is about 70% faster than the Python approach (3.5 mins vs. 2 mins)
+Rust approach is about 70% faster than the Python approach (3.5 mins vs. 2 mins for insertion of approximately 900K entries)
 
 --
 
@@ -446,6 +460,9 @@ Rust approach is about 450% (about 4.5 times faster than the Python approach (5m
 2. Github: https://github.com/gabhijit
 3. LinkedIn: https://linkedin.com/in/gabhijit
 3. Slides: https://hyphenos.io/slides/pycon2023-python-rust/
+4. Code:
+  - https://github.com/gabhijit/ipgiri (Pyton)
+  - https://github.com/gabhijit/rust-learning/tree/master/rust-mrtdump (Rust)
 
 </script>
 </section>
