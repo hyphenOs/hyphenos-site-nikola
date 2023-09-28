@@ -43,24 +43,21 @@
 	<script type="text/template">
 ### Overview of the talk
 
-1. Motivation for the implementation.
-2. Internet routing, BGP and making sense of BGP data.
-3. Internet Routing - IP Lookup Problem and Implementation (Python)
-4. Rust with Python Bindings (`pyo3`) - Overview and implementation.
-5. Performance comparison
+* Problem Statement, Solution
+	1. Motivation for the implementation.
+	2. Internet routing, BGP and making sense of BGP data.
+	3. Internet Routing - IP Lookup Problem and Implementation (Python)
+* Rust and Python
+	4. Rust with Python Bindings (`pyo3`) - Overview and implementation.
+	5. Performance comparison
 
 ---
 ### About Me
 
 1. hyphenOs Software Labs - Systems Software.
 2. Long time Pythonista and recently a Rustacean for the last couple of years.
-3. Building Telecom infrastructure using modern safe programming languages.
 
 ---
-
-How far the server is from the user?
-
---
 
 Map IP Address of the Server to it's Geo-location. Essentially a Geo-IP Lookup problem.
 
@@ -68,11 +65,20 @@ Map IP Address of the Server to it's Geo-location. Essentially a Geo-IP Lookup p
 
 Can Python come to help here?
 
+---
+## What Internet Looks like
+
+![Internet](/slides/pycon2023-python-rust/Internet_map.png "Internet")
 --
 
-Turns out yes, using BGP and other public domain data we can indeed solve this problem using Python.
+## Internet and BGP
 
----
+1. Internet is a giant network of many small interconnected networks.
+2. Each of these networks is called as an Autonomous System (or AS).
+3. Each of these networks have one or more routers that run a protocol called Border Gateway Protocol (BGP)
+4. Through BGP the routers learn about routes from their neighbours and in turn also advertise routes that are reachable through them.
+
+--
 
 ### Internet routing - Autonomous Systems
 ![Autonomous Systems](/slides/pycon2023-python-rust/autonomous-systems.drawio.png "Autonomous Systems")
@@ -83,7 +89,7 @@ Each Autonomous System maps to a Prefix (eg. AS 20000 ie. 'E' Maps to a prefix '
 
 --
 
-## Public Datasets
+## Public Datasets for BGP Updates and AS Information
 
 1. Routeviews (https://routeviews.org/bgpdata/) for BGP RIB Updates
 2. Caida (https://publicdata.caida.org/datasets/) for Autonomous Systems Data
@@ -99,7 +105,9 @@ Each Autonomous System maps to a Prefix (eg. AS 20000 ie. 'E' Maps to a prefix '
 
 ---
 
-BGP Routing Updates data is available as Multi-Threaded Router Toolkit file-format as defined in RFC6396.
+BGP Routing Updates data is available as MRT file-format as defined in RFC6396.
+
+Snapshot of data saved by a BGP router at regular time intervals.
 
 We are interested in IPV4 Unicast types Routing Information Base Entries. (`RIBEntry`)
 
@@ -212,17 +220,7 @@ Using `numpy.dtype` for Routing Table.
 
 ---
 
-## Speeding up table lookup
-
-* Compute sensitive problem (nearly no I/O except when we read routing updates).
-* Should benefit from 'native' implementation. Choices, implement in `C` or `Rust`.
-
---
-
-## Rust advantages
-1. Memory Safety
-2. No Data Races
-3. Lot of higher level data structures, don't need to do heavy lifting ourselves. (Like `Vec`, `HashMap`, `BTreeSet`)
+# Speeding up Lookup Performance in Rust
 
 ---
 
@@ -461,21 +459,13 @@ We will compare performance between two approaches for:
 
 ## Route Table Insertion Performance
 
-Rust approach is about 70% faster than the Python approach (3.5 mins vs. 2 mins for insertion of approximately 900K entries)
+Rust approach is about 40% faster than the Python approach (3.5 mins vs. 2 mins for insertion of approximately 900K entries in a BZipped MRT file of 105MB)
 
 --
 
 ## Route Table Lookup Perforamnce
 
 Rust approach is about 450% (about 4.5 times faster than the Python approach (5ms vs 1ms for 1000 IP address lookups)
-
---
-
-## Discussion about Performance
-
-1. Route table insertion performance is not Pure CPU bound performance.
-2. API available from third party trait is not exactly identical to the Python implementation API.
-3. Also note this performance comparison is with `numpy.dtype` route table implementation (which is already an optimization).
 
 ---
 
