@@ -448,24 +448,9 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ---
 
-## Performance Comparison
+## Route Table Lookup Performance
 
-We will compare performance between two approaches for:
-
-1. Time taken to add entries to routing table
-2. Time taken for lookup in the routing table.
-
---
-
-## Route Table Insertion Performance
-
-Rust approach is about 40% faster than the Python approach (3.5 mins vs. 2 mins for insertion of approximately 900K entries in a BZipped MRT file of 105MB)
-
---
-
-## Route Table Lookup Perforamnce
-
-Rust approach is about 450% (about 4.5 times faster than the Python approach (5ms vs 1ms for 1000 IP address lookups)
+Rust approach is about 450% to 500% about 4.5-5.0 times faster than the Python approach (4.5-5 ms vs 1-1.2 ms for 1000 IP address lookups)
 
 ---
 
