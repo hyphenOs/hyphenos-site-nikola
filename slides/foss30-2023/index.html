@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="date" content="2023-09-22">
+
+    <title>FOSS in Building Telecom Networks: 5G and Beyond</title>
+
+    <link rel="stylesheet" href="/slides/css/reset.css">
+    <link rel="stylesheet" href="/slides/css/reveal.css">
+    <link rel="stylesheet" href="/slides/css/theme/hyphenos.css">
+    <link rel="stylesheet" href="/slides/css/theme/foss.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="/slides/hl/styles/foundation.min.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '/slides/css/print/pdf.css' : '/slides/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+		<script data-goatcounter="https://stats.hyphenos.io/count"
+        async src="//stats.hyphenos.io/count.js"></script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+
+<section>
+	<h3>FOSS in building Telecom Networks:</h3>
+			<h4>5G and Beyond</h4>
+      <h4 class="hosblue"> by Abhijit Gadgil</h4>
+
+</section>
+<section data-markdown data-separator="^---"
+	 data-separator-vertical="^--"
+	 data-separator-notes="^Notes:">
+
+	<script type="text/template">
+### Overview of the talk
+
+* Mobile Wireless Networks Architecture
+* FOSS Projects in Telecom Infrastructure
+* My contributions to FOSS projects
+---
+### About Me
+
+1. hyphenOs Software Labs - Systems Software.
+2. I am a FOSS Enthusiast, mainly interested in use of FOSS in Modern Telecom Infrastructure.
+3. Contributing to several projects in Rust in this space.
+---
+
+What all happens when you are watching India Vs England WC23 Cricket match live while traveling in Namma Metro?
+
+--
+
+Your Phone is trying to connect to the best tower it can connect to? The phone is reporting the quality of the channel as it sees.
+
+--
+
+Network is tracking the location of the phone.
+
+--
+
+Network is controlling the shared radio resource, so as to accommodate maximum number of Users while delivering the desired quality of service to users.
+
+
+--
+
+This is just an overview of thing that happens under the hood, to deliver uninterrupted service.
+---
+
+## 5G Network Architecture
+![5G Network](/slides/foss30-2023/5g_network_architecture.drawio.svg "Network Architecture")
+--
+## 5G Network Architecture
+
+1. Radio Access Network (RAN)
+ - Multiplexing Users
+ - Providing Radio services
+ - Connectivity to the Core Network
+2. Core Network
+ - User Authentication
+ - Network Policies
+ - Connectivity to Internet
+---
+## OpenRAN
+
+![OpenRAN](/slides/foss30-2023/openran.svg "Open RAN")
+
+---
+
+## 5G Core Network
+![Core Network](/slides/foss30-2023/core.png "5G Core")
+
+####  (credit: 5g.systemsapproach.org)
+---
+
+## FOSS Projects
+
+--
+### RAN
+  - Open Air Interface (OAI) (Implemented in C)
+	  - O-CU/O-DU/O-RU implementation
+		- UE implementation and emulation
+
+  - ORAN SC (OSC) (Most components in Golang)
+	  - RAN Intelligent Controlloer (Application Platform)
+    - Simulators
+		- O-CU/O-DU implementations
+		- SDK For platforms
+
+--
+### Core
+  - Open Air Interface (OAI)
+	- Free5gc (Implemented in Golang)
+	- Open5GS (Implemented in C)
+
+--
+
+### Magma
+  - Access Gateway
+	- Federated Gateway
+	- Orchestrator
+
+--
+### Magma Architecture
+![Magma](/slides/foss30-2023/magma_overview.png "Magma Project")
+(Credit: github.com/magma/magma)
+
+---
+
+A Case for Telecom Infrastructure in Rust
+
+- Modern/Safe programming language
+- Performance at Par with C/C++
+- NonGC - Hence no tail latencies (Very important in core infrastructure components).
+
+--
+Challenges:
+
+1. A lot of bootstrapping required.
+   - ASN.1 and SCTP - Protocols widely used in Signaling in Telecom Networks
+   - OpenAPI support
+
+---
+## Rust Projects
+
+### hampi - Rust ASN.1 Toolkit.
+  - ASN.1 Compiler in Rust
+  - Codecs support - Initial focus is 5G signaling protocols (NGAP, E2AP)
+  - Derive Macros for Codecs Support
+
+  - Performance
+    - 15-20% Better than `asn1c` based coded in C (Using Rust bindings)
+    - Few times better than `aper` codec implemented in Golang.
+--
+
+### ellora - Rust SCTP Toolkit.
+ - Ergonomic safe Rust API for Linux kernel's SCTP stack.
+ - Requires no additional third party libraries
+
+--
+### Rust SDK for ORAN-SC
+  - SDK for developing xApps in Rust for ORAN-SC NearRT RIC
+---
+
+### Thanks!
+![Contact](/slides/foss30-2023/contact-qr.png "Contact Me")
+
+#### Scan QR to contact!
+
+</script>
+</section>
+
+      </div>
+    </div>
+
+    <script src="/slides/js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '/slides/plugin/markdown/marked.js' },
+          { src: '/slides/plugin/markdown/markdown.js' },
+          { src: '/slides/plugin/notes/notes.js', async: true },
+          { src: '/slides/plugin/highlight/highlight.js', async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>
