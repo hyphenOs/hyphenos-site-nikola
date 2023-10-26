@@ -44,35 +44,17 @@
 	<script type="text/template">
 ### Overview of the talk
 
-* Mobile Wireless Networks Architecture
-* FOSS Projects in Telecom Infrastructure
+* 5G Network Architecture
+* FOSS Projects in Telecom Infrastructure space
 * My contributions to FOSS projects
 ---
+
 ### About Me
 
 1. hyphenOs Software Labs - Systems Software.
 2. I am a FOSS Enthusiast, mainly interested in use of FOSS in Modern Telecom Infrastructure.
 3. Contributing to several projects in Rust in this space.
----
 
-What all happens when you are watching India Vs England WC23 Cricket match live while traveling in Namma Metro?
-
---
-
-Your Phone is trying to connect to the best tower it can connect to? The phone is reporting the quality of the channel as it sees.
-
---
-
-Network is tracking the location of the phone.
-
---
-
-Network is controlling the shared radio resource, so as to accommodate maximum number of Users while delivering the desired quality of service to users.
-
-
---
-
-This is just an overview of thing that happens under the hood, to deliver uninterrupted service.
 ---
 
 ## 5G Network Architecture
@@ -105,29 +87,25 @@ This is just an overview of thing that happens under the hood, to deliver uninte
 
 --
 ### RAN
-  - Open Air Interface (OAI) (Implemented in C)
-	  - O-CU/O-DU/O-RU implementation
-		- UE implementation and emulation
+  - Open Air Interface (OAI: https://openairinterface.org/)
+    - O-CU/O-DU/O-RU implementation
+    - UE implementation and emulation
 
-  - ORAN SC (OSC) (Most components in Golang)
-	  - RAN Intelligent Controlloer (Application Platform)
+  - ORAN SC (OSC: https://wiki.o-ran-sc.org/ )
+    - RAN Intelligent Controlloer (Application Platform)
     - Simulators
-		- O-CU/O-DU implementations
-		- SDK For platforms
-
+    - O-CU/O-DU implementations
+    - SDK For platforms
 --
 ### Core
-  - Open Air Interface (OAI)
-	- Free5gc (Implemented in Golang)
-	- Open5GS (Implemented in C)
-
+  - Open Air Interface
+  - Free5gc (https://github.com/free5gc)
+  - Open5GS (https://open5gs.org/
 --
-
 ### Magma
-  - Access Gateway
-	- Federated Gateway
-	- Orchestrator
-
+  - (https://magmacore.org)
+  - Project started by Facebook
+  - Supports multiple RATs
 --
 ### Magma Architecture
 ![Magma](/slides/foss30-2023/magma_overview.png "Magma Project")
@@ -137,37 +115,29 @@ This is just an overview of thing that happens under the hood, to deliver uninte
 
 A Case for Telecom Infrastructure in Rust
 
-- Modern/Safe programming language
-- Performance at Par with C/C++
-- NonGC - Hence no tail latencies (Very important in core infrastructure components).
+- Telecom Infra is a crucial component of any modern society.
+- Crucial Infra components should be built using better tools available at disposal.
+  * Memory Safety, no data races.
+- No GC - Hence no tail latencies (Very important in core infrastructure components).
 
 --
 Challenges:
 
-1. A lot of bootstrapping required.
-   - ASN.1 and SCTP - Protocols widely used in Signaling in Telecom Networks
-   - OpenAPI support
+- Proprietary Software predominently:
+  * Not enough developers working in FOSS
+
+- Relatively New
+
+- Bootstrapping Required:
+  * ASN.1 and SCTP - Protocols widely used in Signaling in Telecom Networks
+  * OpenAPI support
 
 ---
 ## Rust Projects
 
-### hampi - Rust ASN.1 Toolkit.
-  - ASN.1 Compiler in Rust
-  - Codecs support - Initial focus is 5G signaling protocols (NGAP, E2AP)
-  - Derive Macros for Codecs Support
-
-  - Performance
-    - 15-20% Better than `asn1c` based coded in C (Using Rust bindings)
-    - Few times better than `aper` codec implemented in Golang.
---
-
-### ellora - Rust SCTP Toolkit.
- - Ergonomic safe Rust API for Linux kernel's SCTP stack.
- - Requires no additional third party libraries
-
---
-### Rust SDK for ORAN-SC
-  - SDK for developing xApps in Rust for ORAN-SC NearRT RIC
+* `hampi` - Rust ASN.1 Toolkit. (https://github.com/gabhijit/hampi)
+* `ellora` - Rust SCTP Toolkit. (https://github.com/gabhijit/ellora)
+* `xapp-frame-rust` - Rust SDK for ORAN-SC NearRT RIC
 ---
 
 ### Thanks!
